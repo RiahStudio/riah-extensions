@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah YouTube Controls</title>
+    <style>
+      :root { font-family: "Segoe UI", Tahoma, sans-serif; }
+      body { margin: 0; min-width: 240px; background: #fff8ef; color: #241f17; }
+      main { padding: 16px; }
+      p { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #8a5a2f; }
+      h1 { margin: 0 0 14px; font-size: 18px; }
+      label { display: flex; gap: 10px; align-items: center; font-size: 14px; }
+      label + label { margin-top: 10px; }
+      #status { margin-top: 10px; min-height: 1.5em; font-size: 12px; color: #5b6270; }
+    </style>
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <main>
+      <p>Riah YouTube Controls</p>
+      <h1>Watch-page behavior</h1>
+      <label>
+        <input id="autoplayEnabled" type="checkbox">
+        <span>Keep autoplay on</span>
+      </label>
+      <label>
+        <input id="captionsOff" type="checkbox">
+        <span>Keep captions off</span>
+      </label>
+      <label>
+        <input id="holdPaused" type="checkbox">
+        <span>Open videos paused</span>
+      </label>
+      <div id="status"></div>
+    </main>
+    <script src="popup.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

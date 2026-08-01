@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah Timeline Exporter</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <main class="popup">
+      <p class="eyebrow">Riah Timeline Exporter</p>
+      <h1 id="status">Idle</h1>
+      <p id="count" class="count">0 tweets collected</p>
+      <label class="toggle">
+        <input id="includeReplies" type="checkbox">
+        <span>Include replies</span>
+      </label>
+      <div class="actions">
+        <button id="start" type="button">Start export</button>
+        <button id="stop" type="button" class="secondary">Stop</button>
+        <button id="download" type="button" class="secondary">Download CSV</button>
+      </div>
+      <p id="message" class="message"></p>
+    </main>
+    <script src="popup.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

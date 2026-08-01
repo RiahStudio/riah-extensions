@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Paste Guard",
+  "version": "0.1.0",
+  "description": "Restores paste in fields where websites try to block it.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    }
+  ],
+  "homepage_url": "https://riahstudio.com/"
+}

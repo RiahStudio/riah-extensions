@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Autoplay Guard",
+  "version": "0.2.0",
+  "description": "Blocks unwanted media autoplay outside YouTube without pausing media you started.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Riah Autoplay Guard",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "main-world.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "homepage_url": "https://riahstudio.com/"
+}

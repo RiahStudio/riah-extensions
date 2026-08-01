@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah Library Search Options</title>
+    <style>
+      :root { font-family: "Segoe UI", Tahoma, sans-serif; }
+      body { margin: 24px; background: #fbf7f2; color: #222; }
+      form { display: grid; gap: 12px; max-width: 720px; }
+      input, button { font: inherit; padding: 10px 12px; }
+      code { background: #eee5d5; padding: 2px 4px; border-radius: 4px; }
+      .status { min-height: 1.3em; color: #5b6270; }
+    </style>
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <h1>Riah Library Search</h1>
+    <p>Use <code>{title}</code>, <code>{author}</code>, and <code>{isbn}</code> in your library search URL.</p>
+    <form id="form">
+      <input id="searchTemplate" type="url" placeholder="https://libby.com/search?q={title}">
+      <button type="submit">Save</button>
+      <div id="status" class="status"></div>
+    </form>
+    <script src="options.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

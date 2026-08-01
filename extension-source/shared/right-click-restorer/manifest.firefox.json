@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Right Click Restorer",
+  "version": "0.2.2",
+  "description": "Restores right-click, copy, and selection without intercepting normal pointer controls.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_title": "Riah Right Click",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "main-world.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "right-click-restorer@riah.extensions",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  },
+  "homepage_url": "https://riahstudio.com/"
+}

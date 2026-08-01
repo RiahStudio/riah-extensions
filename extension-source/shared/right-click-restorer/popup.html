@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah Right Click Restorer</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <main class="popup">
+      <p class="eyebrow">Riah Right Click Restorer</p>
+      <h1 id="host">Current site</h1>
+      <label class="toggle">
+        <input id="enabled" type="checkbox">
+        <span>Force right-click on this site</span>
+      </label>
+      <p id="hint" class="hint">Changes apply after the page reloads.</p>
+    </main>
+    <!--
+      Shared settings module — see ../settings/MIGRATION.md. Load order
+      matters: dependencies (schema, migrate, adapters) before index.js,
+      and index.js before any consumer that calls RiahSettings.*.
+    -->
+    <script src="settings/schema.js"></script>
+    <script src="settings/migrate.js"></script>
+    <script src="settings/adapter-chrome.js"></script>
+    <script src="settings/adapter-firefox.js"></script>
+    <script src="settings/adapter-memory.js"></script>
+    <script src="settings/index.js"></script>
+    <script src="popup.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

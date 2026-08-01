@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Cookie Quiet",
+  "version": "0.1.0",
+  "description": "Dismisses or rejects cookie banners with local rules and conservative fallbacks.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Riah Cookie Quiet",
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "rules.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "homepage_url": "https://riahstudio.com/"
+}

@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Riah YouTube Controls",
+  "version": "0.3.0",
+  "description": "Keeps YouTube autoplay, captions and opening playback in your preferred watch-page state.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_title": "Riah YouTube Controls",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "homepage_url": "https://riahstudio.com/"
+}

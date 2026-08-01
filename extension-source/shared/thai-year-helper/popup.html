@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah Thai Year Helper</title>
+    <style>
+      :root { font-family: "Segoe UI", Tahoma, sans-serif; }
+      body { margin: 0; min-width: 260px; background: #f8f3eb; color: #1f2430; }
+      main { padding: 16px; }
+      p { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #8b5e34; }
+      h1 { margin: 0 0 12px; font-size: 18px; }
+      label { display: flex; gap: 10px; align-items: center; font-size: 14px; margin-bottom: 10px; }
+      select { width: 100%; padding: 8px 10px; font: inherit; }
+      #status { margin-top: 10px; min-height: 1.3em; font-size: 12px; color: #5b6270; }
+    </style>
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <main>
+      <p>Riah Thai Year Helper</p>
+      <h1 id="host">Current site</h1>
+      <label>
+        <input id="enabled" type="checkbox" checked>
+        <span>Enable on this site</span>
+      </label>
+      <label for="mode">Mode</label>
+      <select id="mode">
+        <option value="annotate">Annotate (2568 → 2568 (2025))</option>
+        <option value="replace">Replace (2568 → 2025)</option>
+      </select>
+      <div id="status"></div>
+    </main>
+    <script src="popup.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Timeline Exporter",
+  "version": "0.1.0",
+  "description": "Exports visible X/Twitter posts to a local CSV file.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "storage",
+    "downloads"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Riah Timeline Exporter",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*",
+        "https://*.x.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "homepage_url": "https://riahstudio.com/"
+}

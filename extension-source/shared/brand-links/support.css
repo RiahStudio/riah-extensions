@@ -1,0 +1,32 @@
+.riah-support {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(31, 36, 48, 0.12);
+  color: #6b7280;
+  font: 11px/1.35 "Segoe UI", Tahoma, sans-serif;
+}
+
+.riah-support a {
+  display: inline;
+  margin: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.riah-support a:hover,
+.riah-support a:focus-visible {
+  color: #8b5e34;
+  text-decoration: underline;
+}
+
+.riah-support__separator {
+  color: rgba(107, 114, 128, 0.65);
+}
+
+body > .riah-support {
+  max-width: 720px;
+}

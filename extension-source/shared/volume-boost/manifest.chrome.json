@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Volume Boost",
+  "version": "0.1.0",
+  "description": "Boosts or mutes the current tab's audio after you ask the browser to capture that tab.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "offscreen",
+    "storage",
+    "tabCapture",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Riah Volume Boost",
+    "default_popup": "popup.html"
+  },
+  "homepage_url": "https://riahstudio.com/"
+}

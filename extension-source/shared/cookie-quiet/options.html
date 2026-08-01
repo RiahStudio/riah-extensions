@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah Cookie Quiet Options</title>
+    <style>
+      :root { font-family: "Segoe UI", Tahoma, sans-serif; }
+      body { margin: 24px; background: #fbf7f2; color: #222; }
+      form { display: grid; gap: 12px; max-width: 720px; }
+      fieldset { border: 1px solid #ddd3c2; padding: 12px; }
+      textarea { min-height: 220px; padding: 10px 12px; font: inherit; }
+      button { padding: 10px 12px; font: inherit; }
+      a { color: #8b5e34; text-decoration: none; }
+      .status { min-height: 1.3em; color: #5b6270; }
+    </style>
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <h1>Riah Cookie Quiet</h1>
+    <form id="form">
+      <fieldset>
+        <legend>Default mode</legend>
+        <label><input type="radio" name="defaultMode" value="reject"> Reject all when possible</label><br>
+        <label><input type="radio" name="defaultMode" value="dismiss"> Dismiss only</label><br>
+        <label><input type="radio" name="defaultMode" value="disabled"> Disabled everywhere</label>
+      </fieldset>
+      <label for="overrides">Per-site overrides, one per line as <code>example.com=accept</code></label>
+      <textarea id="overrides" placeholder="example.com=accept&#10;news.example=disabled"></textarea>
+      <button type="submit">Save</button>
+      <a href="rules.js" target="_blank" rel="noreferrer">Audit the rules source</a>
+      <div id="status" class="status"></div>
+    </form>
+    <script src="options.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

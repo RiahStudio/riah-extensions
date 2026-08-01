@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Tab Anchor",
+  "version": "0.1.0",
+  "description": "Moves accidentally detached tabs back into their original browser window.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Riah Tab Anchor"
+  },
+  "homepage_url": "https://riahstudio.com/"
+}

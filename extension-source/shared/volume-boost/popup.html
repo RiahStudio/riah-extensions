@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah Volume Boost</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Riah Volume Boost</p>
+        <h1 id="volumeValue">100%</h1>
+        <p id="tabLabel" class="tab-label">Current tab</p>
+      </header>
+
+      <label class="slider-label" for="gainSlider">
+        <span>Volume</span>
+      </label>
+      <input id="gainSlider" type="range" min="0" max="600" step="10" value="100">
+
+      <div class="quick-actions" aria-label="Volume shortcuts">
+        <button type="button" data-percent="100">100%</button>
+        <button type="button" data-percent="200">200%</button>
+        <button type="button" data-percent="0">Mute</button>
+        <button type="button" id="resetButton">Reset</button>
+      </div>
+
+      <p id="warning" class="warning" hidden>High boost can distort audio. Lower speakers first.</p>
+      <p id="status" class="status" role="status">Ready.</p>
+    </main>
+
+    <script src="brand-links/support.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

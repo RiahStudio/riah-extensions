@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Tab Sleeper",
+  "version": "0.1.0",
+  "description": "Discards idle tabs to free memory while keeping them in your tab bar.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "tabs",
+    "alarms",
+    "storage"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_title": "Riah Tab Sleeper",
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tab-sleeper@riah.extensions",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  },
+  "homepage_url": "https://riahstudio.com/"
+}

@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Tenhou English",
+  "version": "0.1.0",
+  "description": "Adds English UI labels to the Tenhou HTML5 mahjong client.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://tenhou.net/4/*"
+      ],
+      "js": [
+        "translations.js",
+        "content.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tenhou-english@riah.extensions",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  },
+  "homepage_url": "https://riahstudio.com/"
+}

@@ -1,0 +1,66 @@
+:root {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 280px;
+  background: #f9f4ec;
+  color: #1f2430;
+}
+
+.popup {
+  padding: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8b5e34;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.count {
+  margin: 0 0 12px;
+  color: #5b6270;
+}
+
+.toggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.actions {
+  display: grid;
+  gap: 8px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #1f2430;
+  color: #fff;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #5b6270;
+}
+
+.message {
+  min-height: 1.3em;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #5b6270;
+}

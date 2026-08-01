@@ -1,0 +1,61 @@
+:root {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 280px;
+  background: #f8f4ed;
+  color: #1f2430;
+}
+
+.popup {
+  padding: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8b5e34;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: grid;
+  gap: 8px;
+}
+
+legend {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+}
+
+a {
+  display: inline-block;
+  margin-top: 12px;
+  color: #8b5e34;
+  text-decoration: none;
+}
+
+.status {
+  min-height: 1.3em;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #5b6270;
+}

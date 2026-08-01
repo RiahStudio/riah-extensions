@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Library Search",
+  "version": "0.1.0",
+  "description": "Searches your chosen library catalog from a page or selected text.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_title": "Riah Library Search",
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.amazon.com/*",
+        "https://www.amazon.ca/*",
+        "https://www.amazon.co.uk/*",
+        "https://www.amazon.com.au/*",
+        "https://www.amazon.de/*",
+        "https://www.amazon.fr/*",
+        "https://www.amazon.it/*",
+        "https://www.amazon.es/*",
+        "https://www.amazon.co.jp/*",
+        "https://www.amazon.in/*",
+        "https://www.goodreads.com/*",
+        "https://www.google.com/books/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "homepage_url": "https://riahstudio.com/"
+}

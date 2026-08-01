@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah YouTube Quality</title>
+    <style>
+      :root { font-family: "Segoe UI", Tahoma, sans-serif; }
+      body { margin: 0; min-width: 260px; background: #fff8ef; color: #241f17; }
+      main { padding: 16px; display: grid; gap: 10px; }
+      h1 { margin: 0; font-size: 18px; }
+      select, button { font: inherit; padding: 10px 12px; }
+      button { border: none; border-radius: 10px; background: #1f2430; color: #fff; cursor: pointer; }
+      #status { min-height: 1.3em; font-size: 12px; color: #5b6270; }
+    </style>
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <main>
+      <h1>Riah YouTube Quality</h1>
+      <label for="preferredQuality">Preferred max quality</label>
+      <select id="preferredQuality">
+        <option value="auto">Auto-max</option>
+        <option value="2160p">2160p</option>
+        <option value="1440p">1440p</option>
+        <option value="1080p">1080p</option>
+        <option value="720p">720p</option>
+        <option value="480p">480p</option>
+        <option value="360p">360p</option>
+        <option value="240p">240p</option>
+      </select>
+      <button id="save" type="button">Save</button>
+      <div id="status"></div>
+    </main>
+    <script src="popup.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

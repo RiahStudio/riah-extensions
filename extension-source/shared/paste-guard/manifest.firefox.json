@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Paste Guard",
+  "version": "0.1.0",
+  "description": "Restores paste in fields where websites try to block it.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "paste-guard@riah.extensions",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  },
+  "homepage_url": "https://riahstudio.com/"
+}

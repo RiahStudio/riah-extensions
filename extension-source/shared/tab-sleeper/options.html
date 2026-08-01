@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah Tab Sleeper Options</title>
+    <style>
+      :root { font-family: "Segoe UI", Tahoma, sans-serif; }
+      body { margin: 24px; background: #fbf7f2; color: #222; }
+      form { display: grid; gap: 12px; max-width: 520px; }
+      input, textarea, button { font: inherit; padding: 10px 12px; }
+      textarea { min-height: 180px; }
+      .status { min-height: 1.3em; color: #5b6270; }
+    </style>
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <h1>Riah Tab Sleeper</h1>
+    <form id="form">
+      <label for="thresholdMin">Discard after N minutes of inactivity</label>
+      <input id="thresholdMin" type="number" min="1" step="1">
+      <label for="excludeHosts">Never discard these hosts (one per line)</label>
+      <textarea id="excludeHosts"></textarea>
+      <button type="submit">Save</button>
+      <div id="status" class="status"></div>
+    </form>
+    <script src="options.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

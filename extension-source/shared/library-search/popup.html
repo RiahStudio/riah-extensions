@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah Library Search</title>
+    <style>
+      :root { font-family: "Segoe UI", Tahoma, sans-serif; }
+      body { margin: 0; min-width: 280px; background: #f9f4ec; color: #222; }
+      main { padding: 16px; display: grid; gap: 10px; }
+      h1 { margin: 0; font-size: 18px; }
+      input, button, a { font: inherit; }
+      input { padding: 10px 12px; border: 1px solid #c7bea9; border-radius: 10px; }
+      button, a {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: none;
+        background: #1f2430;
+        color: #fff;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      #status { min-height: 1.3em; font-size: 12px; color: #5b6270; }
+    </style>
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <main>
+      <h1>Riah Library Search</h1>
+      <input id="query" type="text" placeholder="Search any title">
+      <button id="search" type="button">Search my library</button>
+      <a href="options.html" target="_blank" rel="noreferrer">Open settings</a>
+      <div id="status"></div>
+    </main>
+    <script src="popup.js"></script>
+      <script src="brand-links/support.js"></script>
+  </body>
+</html>

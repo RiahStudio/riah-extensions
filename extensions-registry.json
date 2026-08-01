@@ -1,0 +1,244 @@
+{
+  "registry_version": "1.0",
+  "last_updated": "2026-07-22",
+  "extensions": [
+    {
+      "id": "right-click-restorer",
+      "name": "Riah Right Click Restorer",
+      "description": "Restores right-click, copy, and selection without intercepting normal pointer controls",
+      "status": "active",
+      "version": "0.2.2",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage",
+        "activeTab"
+      ],
+      "file_path": "extension-source/shared/right-click-restorer",
+      "spec_file": "specs/right-click-restorer.md"
+    },
+    {
+      "id": "autoplay-guard",
+      "name": "Riah Autoplay Guard",
+      "description": "Blocks unwanted media autoplay outside YouTube without pausing media you started",
+      "status": "active",
+      "version": "0.2.0",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage",
+        "activeTab"
+      ],
+      "file_path": "extension-source/shared/autoplay-guard",
+      "spec_file": "specs/autoplay-guard.md"
+    },
+    {
+      "id": "thai-year-helper",
+      "name": "Riah Thai Year Helper",
+      "description": "Adds Gregorian year context beside Buddhist Era years on supported pages",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage",
+        "activeTab"
+      ],
+      "file_path": "extension-source/shared/thai-year-helper",
+      "spec_file": "specs/thai-year-helper.md"
+    },
+    {
+      "id": "cookie-quiet",
+      "name": "Riah Cookie Quiet",
+      "description": "Dismisses or rejects cookie banners with local rules and conservative fallbacks",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "chrome",
+        "edge"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage"
+      ],
+      "file_path": "extension-source/shared/cookie-quiet",
+      "spec_file": "specs/cookie-quiet.md",
+      "browser_note": "Chromium only. Brave Shields blocks consent notices already, and Firefox has its own banner blocker one settings toggle away. Chrome and Edge have no native equivalent."
+    },
+    {
+      "id": "tab-sleeper",
+      "name": "Riah Tab Sleeper",
+      "description": "Discards idle tabs to free memory while keeping them in your tab bar",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "alarms",
+        "storage",
+        "tabs"
+      ],
+      "file_path": "extension-source/shared/tab-sleeper",
+      "spec_file": "specs/tab-sleeper.md",
+      "browser_note": "Firefox only. Chrome Memory Saver and Edge Sleeping Tabs already discard idle tabs; Firefox unloads only under memory pressure, with no idle timer."
+    },
+    {
+      "id": "tab-anchor",
+      "name": "Riah Tab Anchor",
+      "description": "Moves accidentally detached tabs back into their original browser window",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "tabs"
+      ],
+      "file_path": "extension-source/shared/tab-anchor",
+      "spec_file": "specs/tab-anchor.md"
+    },
+    {
+      "id": "paste-guard",
+      "name": "Riah Paste Guard",
+      "description": "Restores paste in fields where websites try to block it",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [],
+      "file_path": "extension-source/shared/paste-guard",
+      "spec_file": "specs/paste-guard.md"
+    },
+    {
+      "id": "library-search",
+      "name": "Riah Library Search",
+      "description": "Searches your chosen library catalog from a page or selected text",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage"
+      ],
+      "file_path": "extension-source/shared/library-search",
+      "spec_file": "specs/library-search.md"
+    },
+    {
+      "id": "tenhou-english",
+      "name": "Riah Tenhou English",
+      "description": "Adds English UI labels to the Tenhou HTML5 mahjong client",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [],
+      "file_path": "extension-source/shared/tenhou-english",
+      "spec_file": "specs/tenhou-english.md"
+    },
+    {
+      "id": "timeline-exporter",
+      "name": "Riah Timeline Exporter",
+      "description": "Exports visible X/Twitter posts to a local CSV file",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage",
+        "downloads"
+      ],
+      "file_path": "extension-source/shared/timeline-exporter",
+      "spec_file": "specs/timeline-exporter.md"
+    },
+    {
+      "id": "volume-boost",
+      "name": "Riah Volume Boost",
+      "description": "Boosts or mutes current-tab audio in Brave/Chromium after a user-triggered tab capture",
+      "status": "active",
+      "version": "0.1.0",
+      "browsers_supported": [
+        "chrome",
+        "edge"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "activeTab",
+        "offscreen",
+        "storage",
+        "tabCapture",
+        "tabs"
+      ],
+      "file_path": "extension-source/shared/volume-boost",
+      "spec_file": "specs/volume-boost.md"
+    },
+    {
+      "id": "youtube-quality",
+      "name": "Riah YouTube Quality",
+      "description": "Sets YouTube playback quality up to your preferred ceiling",
+      "status": "active",
+      "version": "0.1.1",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage"
+      ],
+      "file_path": "extension-source/shared/youtube-quality",
+      "spec_file": "specs/youtube-quality.md"
+    },
+    {
+      "id": "youtube-controls",
+      "name": "Riah YouTube Controls",
+      "description": "Keeps YouTube autoplay, captions, and opening playback in your preferred watch-page state",
+      "status": "active",
+      "version": "0.3.0",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage"
+      ],
+      "file_path": "extension-source/shared/youtube-controls",
+      "spec_file": "specs/youtube-controls.md"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Riah Tab Anchor",
+  "version": "0.1.0",
+  "description": "Moves accidentally detached tabs back into their original browser window.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "tabs"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_title": "Riah Tab Anchor"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tab-anchor@riah.extensions",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  },
+  "homepage_url": "https://riahstudio.com/"
+}
