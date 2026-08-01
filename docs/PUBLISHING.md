@@ -6,7 +6,6 @@ This repo has two release outputs:
 - A clean GitHub seed under `public-export/riah-extensions/`, created by
   `npm run export:public`.
 
-Use the public export as the public repository source. The full local workspace
 contains private workflow and migration notes that should stay local.
 
 ## Release Checklist
@@ -15,7 +14,6 @@ contains private workflow and migration notes that should stay local.
 npm test
 npm run build
 npm run package:public
-Start All Riah Extensions in Brave.bat --check
 npm run export:public
 ```
 

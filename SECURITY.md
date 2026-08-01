@@ -3,8 +3,8 @@
 ## Reporting
 
 If you find a vulnerability, please report it privately through GitHub Security
-Advisories once the public repository is live. If advisories are not available,
-use the contact path at <https://riahstudio.com/>.
+Advisories. If advisories are not available, use the contact path at
+<https://riahstudio.com/>.
 
 Please do not open a public issue for an active vulnerability before there has
 been time to investigate and prepare a fix.
@@ -20,14 +20,13 @@ been time to investigate and prepare a fix.
 
 ## Maintenance Checks
 
-Before a public release:
+Before cutting a release:
 
 ```powershell
 npm test
 npm run build
 npm run package:public
-Start All Riah Extensions in Brave.bat --check
 ```
 
-Also review the generated ZIPs under `release/` and the public export under
-`public-export/riah-extensions/`.
+Review the generated ZIPs under `release/` before uploading anything to a
+browser store.

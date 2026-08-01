@@ -1,7 +1,6 @@
-# Public Naming Pass
+# Public Naming
 
-This pass moves the extension set toward public, store-safe names and
-public-safe source slugs.
+Rules for visible product names and store-safe source slugs.
 
 ## Naming Rules
 
@@ -10,7 +9,7 @@ public-safe source slugs.
 - Avoid profanity, clone-style titles, and store-listing phrasing that sounds
   like a repackage.
 - Keep popup support links small: `Riah Studio` and `Buy me a coffee` only.
-- Extension icons should use the official Riah icon system in
+- Extension icons use the official Riah icon system in
   `docs/brand/riah-icon-system/icons/`. SVG files are the masters.
 
 ## Public Names
@@ -23,33 +22,32 @@ public-safe source slugs.
 | `cookie-quiet` | Riah Cookie Quiet |
 | `tab-anchor` | Riah Tab Anchor |
 | `paste-guard` | Riah Paste Guard |
-| `zoom-baseline` | Riah Zoom Baseline |
 | `library-search` | Riah Library Search |
 | `tab-sleeper` | Riah Tab Sleeper |
 | `tenhou-english` | Riah Tenhou English |
-| `page-translator` | Riah Page Translator |
-| `selection-translator` | Riah Selection Translator |
 | `timeline-exporter` | Riah Timeline Exporter |
 | `volume-boost` | Riah Volume Boost |
 | `youtube-quality` | Riah YouTube Quality |
 | `youtube-controls` | Riah YouTube Controls |
-| `site-zoom` | Riah Site Zoom |
 
-## First Public Slice
+## Retired names
 
-Start with the extensions that are useful, easy to explain, and already have
-focused tests around risky behavior:
+These were removed when the browsers gained the same behavior natively:
+
+| Source slug | Why it left |
+| --- | --- |
+| `site-zoom` | Native per-site zoom |
+| `zoom-baseline` | Native default zoom preference |
+| `page-translator` | Native page translation |
+| `selection-translator` | Native selection translation |
+
+## Store upload order
+
+GitHub is the first public surface. If and when browser-store uploads start,
+begin with:
 
 1. Riah YouTube Controls
 2. Riah YouTube Quality
 3. Riah Volume Boost
-4. Riah Site Zoom
 
-Then add smaller utility releases in batches after the first store review path
-is proven.
-
-## Public Export Rule
-
-Use `npm run export:public` before creating a public GitHub repository. The
-generated `public-export/riah-extensions/` tree excludes local-only workflow,
-migration, and agent notes.
+Then add the remaining utilities in small batches after that path is proven.

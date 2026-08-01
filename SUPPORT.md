@@ -2,8 +2,7 @@
 
 For general updates and project context, visit <https://riahstudio.com/>.
 
-For bugs or feature requests, use GitHub Issues after the public repository is
-created. Include:
+For bugs or feature requests, open a GitHub Issue and include:
 
 - Browser and version.
 - Extension name and version.
@@ -14,6 +13,3 @@ The popup/options footer links are intentionally small:
 
 - `Riah Studio` links to <https://riahstudio.com/>.
 - `Buy me a coffee` links to <https://buymeacoffee.com/riahstudio/>.
-
-Before the first public release, verify that the Buy Me a Coffee account slug is
-the intended public Riah Studio donation page.
