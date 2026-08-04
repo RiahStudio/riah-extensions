@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-08-04 - Buy me a coffee on the README
+
+- Public README now carries a quiet Buy me a coffee link to https://buymeacoffee.com/riahstudio (popup footers already had it).
+
 ## 2026-08-04 - Public pitch: copy these, Brave first
 
 - README now leads with the Levels warning about store extensions getting sold, and the real ask: point an agent at the source and rebuild your own.

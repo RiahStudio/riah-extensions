@@ -91,6 +91,10 @@ Some tools only ship where the browser is missing them. Cookie Quiet is for Chro
 - `docs/PUBLISHING.md`
 - `docs/brand/` for the pink icon system
 
+## Buy me a coffee
+
+These are free. If they helped, you can [buy me a coffee](https://buymeacoffee.com/riahstudio).
+
 ## Credit
 
 Pieter Levels wrote about extensions getting bought by spyware and malware outfits, and about open-sourcing tools you can audit or customize with AI. Start here: [levels.io/open-sourced-chrome-extension-superlevels](https://levels.io/open-sourced-chrome-extension-superlevels). This repo is my version of that idea: small readable sources you can steal from on purpose.
