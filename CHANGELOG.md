@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-04 - Public pitch: copy these, Brave first
+
+- README now leads with the Levels warning about store extensions getting sold, and the real ask: point an agent at the source and rebuild your own.
+- Pink extension icons sit near the top of the README so the set reads as a visual product, not a file dump.
+- Brave is named as the tested daily driver. Chrome and Firefox stay source-available until those browsers are loaded and checked.
+
 ## 2026-08-04 - Shorts open paused
 
 - Riah YouTube Controls 0.3.1 applies "Open videos paused" to `/shorts` as well as `/watch`.

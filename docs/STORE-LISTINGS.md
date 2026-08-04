@@ -1,5 +1,8 @@
 # Store Listing Drafts
 
+> Status: Brave is the personally tested daily driver. Chrome and Firefox listings stay on hold until those browsers are loaded and checked by hand.
+
+
 Use these as first-pass listing notes. Tune screenshots and final copy per store.
 
 | Extension | One-line summary | Permission note |
