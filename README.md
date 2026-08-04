@@ -1,6 +1,6 @@
 # Riah Extensions
 
-Browser extensions get sold. The new owner can change what the code does while you keep the same install. [Pieter Levels](https://levels.io/open-sourced-chrome-extension-superlevels) has been loud about that risk, and he is right.
+Browser extensions are awesome, but sometimes they get sold. The new owner can change what the code does while you keep the same install. [Pieter Levels](https://levels.io/open-sourced-chrome-extension-superlevels) has been loud about that risk, and he is right.
 
 These are small extensions I actually use. You can load them if you want. The better use is to point your agent at this repo and rebuild your own versions from the source. I do not expect you to run my exact set.
 
