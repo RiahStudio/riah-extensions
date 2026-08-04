@@ -83,3 +83,6 @@ These are free. If they helped, you can [buy me a coffee](https://buymeacoffee.c
 
 Pieter Levels wrote about extensions getting bought by spyware and malware outfits, and about open-sourcing tools you can audit or customize with AI. Start here: [levels.io/open-sourced-chrome-extension-superlevels](https://levels.io/open-sourced-chrome-extension-superlevels). This repo is my version of that idea: small readable sources you can steal from on purpose.
 
+## Build your own
+
+Copy the `_template`, rename it, and load the unpacked build in Brave. Walkthrough: [docs/BUILD-YOUR-OWN.md](docs/BUILD-YOUR-OWN.md).

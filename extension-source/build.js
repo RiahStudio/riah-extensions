@@ -59,7 +59,7 @@ function isExtensionFolder(folder) {
 function listSharedDirs() {
   return fs
     .readdirSync(SHARED, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith("_") && !entry.name.startsWith("."))
     .map((entry) => entry.name)
     .sort();
 }

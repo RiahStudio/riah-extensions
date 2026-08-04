@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Your Extension Name",
+  "version": "0.1.0",
+  "description": "One sentence: what this does.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "your-extension@riah.studio",
+      "strict_min_version": "109.0"
+    }
+  },
+  "icons": {
+    "16": "icons/32.png",
+    "32": "icons/32.png",
+    "48": "icons/128.png",
+    "128": "icons/128.png"
+  },
+  "action": {
+    "default_title": "Your Extension Name",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/32.png",
+      "32": "icons/32.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://example.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": ["https://example.com/*"]
+}
