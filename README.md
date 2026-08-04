@@ -31,9 +31,12 @@ Slug folders live under `extension-source/shared/<slug>/`.
 That is the main point of publishing these.
 
 1. Clone the repo, or open it in Cursor / Claude Code / Codex / whatever you use.
-2. Ask the agent to rebuild one extension for your browser, with your rules.
-3. Keep the readable one-job shape. Change the behavior until it is yours.
-4. Load the unpacked build yourself and read the source before you trust it.
+2. Inventory what you already run: `node scripts/inventory-extensions.mjs` (Brave by default). Paste the output to the agent, or let it read your profile.
+3. Ask for a triage: what to replace, what to keep, what one job to rebuild first.
+4. Keep the readable one-job shape. Change the behavior until it is yours.
+5. Load the unpacked build yourself and read the source before you trust it.
+
+Full loop (inventory, replace-vs-keep, template): [docs/BUILD-YOUR-OWN.md](docs/BUILD-YOUR-OWN.md).
 
 You can also install these as-is. Treat that as a starting point, not a brand loyalty program.
 
@@ -85,4 +88,7 @@ Pieter Levels wrote about extensions getting bought by spyware and malware outfi
 
 ## Build your own
 
-Copy the `_template`, rename it, and load the unpacked build in Brave. Walkthrough: [docs/BUILD-YOUR-OWN.md](docs/BUILD-YOUR-OWN.md).
+Do not start by guessing. Scan what is installed, decide what is worth replacing, then rebuild one small job.
+
+- Inventory: `node scripts/inventory-extensions.mjs`
+- Guide: [docs/BUILD-YOUR-OWN.md](docs/BUILD-YOUR-OWN.md)

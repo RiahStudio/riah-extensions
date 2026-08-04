@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-04 - Inventory + replace triage
+
+- docs/BUILD-YOUR-OWN.md now covers the real loop: scan installed extensions, triage replace/keep/skip, then rebuild from _template or an existing slug.
+- Added scripts/inventory-extensions.mjs to read Brave/Chrome/Edge profiles on disk (no management permission).
+- README points agents at inventory first, not just "copy the template."
+
 ## 2026-08-04 - Buy me a coffee on the README
 
 - Public README now carries a quiet Buy me a coffee link to https://buymeacoffee.com/riahstudio (popup footers already had it).
