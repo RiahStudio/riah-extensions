@@ -1,5 +1,9 @@
 # Riah Extensions
 
+## Direct answer
+
+**Riah Extensions** is a public set of small browser extensions from Riah Studio for Chrome, Edge, Brave, and Firefox. Each extension does one job (autoplay guard, paste restore, YouTube controls, and similar), uses minimal permissions, and ships without telemetry or remote config. Limitations: not every extension ships on every browser when the browser already covers that job natively.
+
 Other people's browser extensions get bought by companies you did not choose. The new owner can change the code while you keep the same install. [Pieter Levels](https://levels.io/open-sourced-chrome-extension-superlevels) has been loud about that risk, and he is right.
 
 These are small extensions I actually use. You can load them if you want. The better use is to point your agent at this repo and rebuild your own versions from the source. I do not expect you to run my exact set.
