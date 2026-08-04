@@ -19,8 +19,21 @@
     return location.pathname === "/watch";
   }
 
+  function isShortsPage() {
+    return location.pathname === "/shorts" || location.pathname.startsWith("/shorts/");
+  }
+
+  // Open-paused covers watch pages and Shorts. Autonav + captions stay watch-only.
+  function isHoldPage() {
+    return isWatchPage() || isShortsPage();
+  }
+
   function playerRoot() {
-    return document.querySelector("#movie_player, .html5-video-player") || document;
+    return (
+      document.querySelector(
+        "#movie_player, #shorts-player, ytd-reel-video-renderer #player, .html5-video-player"
+      ) || document
+    );
   }
 
   function findAutoplayButton() {
@@ -177,63 +190,58 @@
 
   // Open videos paused.
   //
-  // The 0.1.0 autoplay stopper paused on every media insert, so YouTube also
-  // paused on fullscreen, resize and player relayout. This holds the opening
-  // frame only: at most one pause per watch page, only in the first seconds,
-  // only when the user has not already touched the player, and never through a
-  // page-wide observer, a style change or pointer interception.
+  // Holds the opening frame on /watch and /shorts until the user touches the
+  // player (or the hold window expires). YouTube Shorts often re-fire play()
+  // after a single pause, so we keep holding while the guards still apply —
+  // never via a page-wide observer, style change, or pointer interception.
+  // Fullscreen / resize / relayout past the opening seconds are left alone.
   const HOLD_WINDOW_MS = 20000;
   const HOLD_MAX_SECONDS = 2;
   let holdWanted = false;
   let holdLoaded = false;
-  let holdSpent = false;
   let holdArmedAt = Date.now();
-  let holdPending = null;
   let playerTouched = false;
 
   function insidePlayer(node) {
-    return !!node?.closest?.("#movie_player, .html5-video-player");
+    return !!node?.closest?.(
+      "#movie_player, #shorts-player, ytd-reel-video-renderer, ytd-shorts, .html5-video-player"
+    );
   }
 
   function armHold() {
-    holdSpent = false;
     holdArmedAt = Date.now();
-    holdPending = null;
     playerTouched = false;
   }
 
-  function runHold() {
-    const video = holdPending;
-    if (!holdLoaded || !holdWanted || holdSpent || !video) {
-      return;
-    }
-
-    holdPending = null;
-    holdSpent = true;
-
-    if (
-      playerTouched ||
-      !isWatchPage() ||
-      Date.now() - holdArmedAt > HOLD_WINDOW_MS ||
-      video.currentTime > HOLD_MAX_SECONDS
-    ) {
-      return;
-    }
-
-    video.pause();
+  function shouldHold(video) {
+    return (
+      holdLoaded &&
+      holdWanted &&
+      !playerTouched &&
+      isHoldPage() &&
+      Date.now() - holdArmedAt <= HOLD_WINDOW_MS &&
+      Number(video?.currentTime || 0) <= HOLD_MAX_SECONDS
+    );
   }
 
-  document.addEventListener(
-    "play",
-    (event) => {
-      if (holdSpent || !isWatchPage() || !insidePlayer(event.target)) {
-        return;
-      }
-      holdPending = event.target;
-      runHold();
-    },
-    { capture: true }
-  );
+  function holdIfNeeded(video) {
+    if (!video || !shouldHold(video)) {
+      return false;
+    }
+    video.pause();
+    return true;
+  }
+
+  function onPlaybackAttempt(event) {
+    if (!insidePlayer(event.target)) {
+      return;
+    }
+    holdIfNeeded(event.target);
+  }
+
+  document.addEventListener("play", onPlaybackAttempt, { capture: true });
+  // Shorts often win a race past the play event; catch the playing state too.
+  document.addEventListener("playing", onPlaybackAttempt, { capture: true });
 
   for (const name of ["pointerdown", "keydown"]) {
     document.addEventListener(
@@ -251,7 +259,16 @@
     .then(({ holdPaused }) => {
       holdWanted = holdPaused !== false;
       holdLoaded = true;
-      runHold();
+      const videos = document.querySelectorAll(
+        "#movie_player video, #shorts-player video, ytd-reel-video-renderer video, .html5-video-player video"
+      );
+      for (const video of videos) {
+        // Only pause media that already started. Calling pause() on a still
+        // dormant video is a no-op for playback but breaks fixture counters.
+        if (!video.paused) {
+          holdIfNeeded(video);
+        }
+      }
     })
     .catch((error) => console.warn(error.message));
 
@@ -259,14 +276,16 @@
     armHold();
     setTimeout(scheduleApply, 400);
   });
-  document.addEventListener("yt-page-data-updated", scheduleApply);
+  document.addEventListener("yt-page-data-updated", () => {
+    if (isShortsPage()) {
+      armHold();
+    }
+    scheduleApply();
+  });
   window.addEventListener("load", scheduleApply, { once: true });
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (
-      message?.type !== "riah-youtube-controls-apply" &&
-      message?.type !== "riah-youtube-controls-apply"
-    ) {
+    if (message?.type !== "riah-youtube-controls-apply") {
       return;
     }
 

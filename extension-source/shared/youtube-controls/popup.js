@@ -59,7 +59,7 @@ async function main() {
   autoplayToggle.checked = autoplayEnabled;
   captionsToggle.checked = captionsOff;
   holdToggle.checked = holdPaused;
-  status.textContent = "Preferences are active on YouTube watch pages.";
+  status.textContent = "Preferences are active on YouTube watch pages and Shorts.";
 
   async function saveAndApply() {
     await storageSet({

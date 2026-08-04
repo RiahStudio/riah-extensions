@@ -23,7 +23,7 @@ gets its own zip under `release/`.
 | Riah Thai Year Helper | `thai-year-helper` | Chrome, Edge, Firefox | Adds Gregorian year context beside Thai Buddhist Era years. |
 | Riah Timeline Exporter | `timeline-exporter` | Chrome, Edge, Firefox | Exports visible X/Twitter posts to a local CSV file. |
 | Riah Volume Boost | `volume-boost` | Chrome, Edge | Boosts or mutes current-tab audio. |
-| Riah YouTube Controls | `youtube-controls` | Chrome, Edge, Firefox | Opens watch pages paused and keeps autoplay and captions in the preferred state. |
+| Riah YouTube Controls | `youtube-controls` | Chrome, Edge, Firefox | Opens watch pages and Shorts paused and keeps autoplay and captions in the preferred state. |
 | Riah YouTube Quality | `youtube-quality` | Chrome, Edge, Firefox | Sets YouTube playback quality up to a preferred ceiling. |
 
 ## Two extensions ship to some browsers and not others

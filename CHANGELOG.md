@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-04 - Shorts open paused
+
+- Riah YouTube Controls 0.3.1 applies "Open videos paused" to `/shorts` as well as `/watch`.
+- Shorts often re-fire `play` after one pause; the hold now keeps pausing until you touch the player (or the short hold window ends), instead of spending itself on the first attempt.
+- Autonav + captions prefs stay watch-page only — Shorts do not use that control.
+
 ## 2026-07-29 - Per-browser sets, own icons, and Edge packages
 
 - **Every extension now has its own glyph.** The old mapping reused a handful of

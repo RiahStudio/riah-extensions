@@ -225,9 +225,9 @@
     {
       "id": "youtube-controls",
       "name": "Riah YouTube Controls",
-      "description": "Keeps YouTube autoplay, captions, and opening playback in your preferred watch-page state",
+      "description": "Keeps YouTube autoplay, captions, and opening playback in your preferred state on watch pages and Shorts",
       "status": "active",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "browsers_supported": [
         "chrome",
         "edge",
