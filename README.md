@@ -1,30 +1,10 @@
 # Riah Extensions
 
-## Direct answer
-
-**Riah Extensions** is a public set of small browser extensions from Riah Studio for Chrome, Edge, Brave, and Firefox. Each extension does one job (autoplay guard, paste restore, YouTube controls, and similar), uses minimal permissions, and ships without telemetry or remote config. Limitations: not every extension ships on every browser when the browser already covers that job natively.
-
-Browser extensions are awesome, but sometimes they get sold. The new owner can change what the code does while you keep the same install. [Pieter Levels](https://levels.io/open-sourced-chrome-extension-superlevels) has been loud about that risk, and he is right.
+Other people's browser extensions get bought by companies you did not choose. The new owner can change the code while you keep the same install. [Pieter Levels](https://levels.io/open-sourced-chrome-extension-superlevels) has been loud about that risk, and he is right.
 
 These are small extensions I actually use. You can load them if you want. The better use is to point your agent at this repo and rebuild your own versions from the source. I do not expect you to run my exact set.
 
 Each one does one job. Minimal permissions. No telemetry. No remote scripts. No remote config. Pink Riah icons so you can tell them apart on the toolbar.
-
-<p>
-<img src="extension-source/shared/autoplay-guard/icons/128.png" width="72" alt="Autoplay Guard" />
-<img src="extension-source/shared/cookie-quiet/icons/128.png" width="72" alt="Cookie Quiet" />
-<img src="extension-source/shared/library-search/icons/128.png" width="72" alt="Library Search" />
-<img src="extension-source/shared/paste-guard/icons/128.png" width="72" alt="Paste Guard" />
-<img src="extension-source/shared/right-click-restorer/icons/128.png" width="72" alt="Right Click Restorer" />
-<img src="extension-source/shared/tab-anchor/icons/128.png" width="72" alt="Tab Anchor" />
-<img src="extension-source/shared/tab-sleeper/icons/128.png" width="72" alt="Tab Sleeper" />
-<img src="extension-source/shared/tenhou-english/icons/128.png" width="72" alt="Tenhou English" />
-<img src="extension-source/shared/thai-year-helper/icons/128.png" width="72" alt="Thai Year Helper" />
-<img src="extension-source/shared/timeline-exporter/icons/128.png" width="72" alt="Timeline Exporter" />
-<img src="extension-source/shared/volume-boost/icons/128.png" width="72" alt="Volume Boost" />
-<img src="extension-source/shared/youtube-controls/icons/128.png" width="72" alt="YouTube Controls" />
-<img src="extension-source/shared/youtube-quality/icons/128.png" width="72" alt="YouTube Quality" />
-</p>
 
 ## What I use them for
 
