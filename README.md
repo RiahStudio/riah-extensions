@@ -14,19 +14,19 @@ Each one does one job. Minimal permissions. No telemetry. No remote scripts. No 
 
 | | Extension | What it does |
 | --- | --- | --- |
-| <img src="extension-source/shared/autoplay-guard/icons/128.png" width="40" alt="" /> | **Autoplay Guard** | Blocks unwanted media autoplay outside YouTube. |
-| <img src="extension-source/shared/cookie-quiet/icons/128.png" width="40" alt="" /> | **Cookie Quiet** | Dismisses or rejects cookie consent banners. |
-| <img src="extension-source/shared/library-search/icons/128.png" width="40" alt="" /> | **Library Search** | Opens a configured library or catalog search from book pages. |
-| <img src="extension-source/shared/paste-guard/icons/128.png" width="40" alt="" /> | **Paste Guard** | Restores paste where sites try to block it. |
-| <img src="extension-source/shared/right-click-restorer/icons/128.png" width="40" alt="" /> | **Right Click Restorer** | Restores right-click, copy, selection, and image drag. |
-| <img src="extension-source/shared/tab-anchor/icons/128.png" width="40" alt="" /> | **Tab Anchor** | Puts accidentally detached tabs back where they belong. |
-| <img src="extension-source/shared/tab-sleeper/icons/128.png" width="40" alt="" /> | **Tab Sleeper** | Discards idle tabs on a timer (Firefox). |
-| <img src="extension-source/shared/tenhou-english/icons/128.png" width="40" alt="" /> | **Tenhou English** | English labels on Tenhou. |
-| <img src="extension-source/shared/thai-year-helper/icons/128.png" width="40" alt="" /> | **Thai Year Helper** | Gregorian year next to Thai Buddhist Era years. |
-| <img src="extension-source/shared/timeline-exporter/icons/128.png" width="40" alt="" /> | **Timeline Exporter** | Exports visible X posts to a local CSV. |
-| <img src="extension-source/shared/volume-boost/icons/128.png" width="40" alt="" /> | **Volume Boost** | Boosts or mutes the current tab. |
-| <img src="extension-source/shared/youtube-controls/icons/128.png" width="40" alt="" /> | **YouTube Controls** | Opens watch pages and Shorts paused. Keeps autoplay and captions where you want them. |
-| <img src="extension-source/shared/youtube-quality/icons/128.png" width="40" alt="" /> | **YouTube Quality** | Caps YouTube quality at your preferred ceiling. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/autoplay-guard/icons/128.png" width="40" alt="" /> | **Autoplay Guard** | Blocks unwanted media autoplay outside YouTube. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/cookie-quiet/icons/128.png" width="40" alt="" /> | **Cookie Quiet** | Dismisses or rejects cookie consent banners. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/library-search/icons/128.png" width="40" alt="" /> | **Library Search** | Opens a configured library or catalog search from book pages. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/paste-guard/icons/128.png" width="40" alt="" /> | **Paste Guard** | Restores paste where sites try to block it. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/right-click-restorer/icons/128.png" width="40" alt="" /> | **Right Click Restorer** | Restores right-click, copy, selection, and image drag. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/tab-anchor/icons/128.png" width="40" alt="" /> | **Tab Anchor** | Puts accidentally detached tabs back where they belong. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/tab-sleeper/icons/128.png" width="40" alt="" /> | **Tab Sleeper** | Discards idle tabs on a timer (Firefox). |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/tenhou-english/icons/128.png" width="40" alt="" /> | **Tenhou English** | English labels on Tenhou. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/thai-year-helper/icons/128.png" width="40" alt="" /> | **Thai Year Helper** | Gregorian year next to Thai Buddhist Era years. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/timeline-exporter/icons/128.png" width="40" alt="" /> | **Timeline Exporter** | Exports visible X posts to a local CSV. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/volume-boost/icons/128.png" width="40" alt="" /> | **Volume Boost** | Boosts or mutes the current tab. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/youtube-controls/icons/128.png" width="40" alt="" /> | **YouTube Controls** | Opens watch pages and Shorts paused. Keeps autoplay and captions where you want them. |
+| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/youtube-quality/icons/128.png" width="40" alt="" /> | **YouTube Quality** | Caps YouTube quality at your preferred ceiling. |
 
 Slug folders live under `extension-source/shared/<slug>/`.
 
