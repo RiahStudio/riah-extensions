@@ -279,7 +279,15 @@ async function navigate(page, url, waitMs = 1200) {
 
 function createFixtureServer(routes) {
   const server = http.createServer((request, response) => {
-    const route = routes[request.url];
+    let route = routes[request.url];
+    if (!route) {
+      try {
+        const parsed = new URL(request.url, "http://127.0.0.1");
+        if (parsed.pathname === "/watch" && parsed.searchParams.has("list")) {
+          route = routes["/watch"];
+        }
+      } catch (_) {}
+    }
     if (!route) {
       response.writeHead(404, { "content-type": "text/plain" });
       response.end("Not found");
@@ -313,7 +321,28 @@ function buildInjectedSource({ storageSync = {}, storageLocal = {}, extra = "", 
       storageLocal: ${JSON.stringify(storageLocal)},
       runtimeMessages: [],
       openedUrls: [],
-      listeners: []
+      listeners: [],
+      localSetCalls: 0,
+      /*
+       * chrome.storage.get accepts a defaults object, a single key, an array of
+       * keys, or null for everything. The defaults-object form keeps its long
+       * standing behaviour of layering the whole store over the defaults.
+       */
+      read(store, query) {
+        if (query === null || query === undefined) return Object.assign({}, store);
+        if (typeof query === "string") {
+          return query in store ? { [query]: store[query] } : {};
+        }
+        if (Array.isArray(query)) {
+          const picked = {};
+          for (const key of query) if (key in store) picked[key] = store[key];
+          return picked;
+        }
+        return Object.assign({}, query, store);
+      },
+      drop(store, keys) {
+        for (const key of Array.isArray(keys) ? keys : [keys]) delete store[key];
+      }
     };
     window.chrome = {
       runtime: {
@@ -337,10 +366,16 @@ function buildInjectedSource({ storageSync = {}, storageLocal = {}, extra = "", 
       storage: {
         sync: {
           get(defaults, callback) {
-            callback(Object.assign({}, defaults, window.__riahTest.storageSync));
+            callback(window.__riahTest.read(window.__riahTest.storageSync, defaults));
           },
           set(value, callback) {
             Object.assign(window.__riahTest.storageSync, value);
+            if (callback) {
+              callback();
+            }
+          },
+          remove(keys, callback) {
+            window.__riahTest.drop(window.__riahTest.storageSync, keys);
             if (callback) {
               callback();
             }
@@ -348,10 +383,17 @@ function buildInjectedSource({ storageSync = {}, storageLocal = {}, extra = "", 
         },
         local: {
           get(defaults, callback) {
-            callback(Object.assign({}, defaults, window.__riahTest.storageLocal));
+            callback(window.__riahTest.read(window.__riahTest.storageLocal, defaults));
           },
           set(value, callback) {
+            window.__riahTest.localSetCalls += 1;
             Object.assign(window.__riahTest.storageLocal, value);
+            if (callback) {
+              callback();
+            }
+          },
+          remove(keys, callback) {
+            window.__riahTest.drop(window.__riahTest.storageLocal, keys);
             if (callback) {
               callback();
             }
@@ -500,6 +542,11 @@ async function runStaticAudit() {
       permissions: ["storage"],
       hostPermissions: [],
       matches: ["https://m.youtube.com/*", "https://www.youtube.com/*"]
+    },
+    "youtube-resume": {
+      permissions: ["storage"],
+      hostPermissions: [],
+      matches: ["https://m.youtube.com/*", "https://www.youtube.com/*"]
     }
   };
 
@@ -600,7 +647,8 @@ async function runStaticAudit() {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        walk(full);
+        // Underscore dirs (_template) are scaffolds, not shipping extensions.
+        if (!entry.name.startsWith("_")) walk(full);
       } else if (/\.(js|html|json)$/i.test(entry.name)) {
         files.push(full);
       }
@@ -656,16 +704,50 @@ async function runStaticAudit() {
   for (const fileName of ["content.js", "main-world.js"]) {
     const autoplaySource = read(path.join(SHARED, "autoplay-guard", fileName));
     assert(
-      autoplaySource.includes('host.endsWith(".youtube.com")') &&
+      autoplaySource.includes('"youtube.com"') &&
+        autoplaySource.includes('"soundcloud.com"') &&
+        autoplaySource.includes('"spotify.com"') &&
+        autoplaySource.includes("music.apple.com") &&
+        autoplaySource.includes("music.amazon.") &&
         !autoplaySource.includes(".pause("),
-      `autoplay-guard ${fileName} should bypass YouTube and never pause existing media.`
+      `autoplay-guard ${fileName} should bypass dedicated music hosts and never pause existing media.`
     );
   }
+
+
+  const autoplayMainWorld = read(path.join(SHARED, "autoplay-guard", "main-world.js"));
+  const autoplayContent = read(path.join(SHARED, "autoplay-guard", "content.js"));
+  const musicBypassFrom = (source) => source.slice(source.indexOf("function isBypassedHost"), source.indexOf("if (isBypassedHost"));
+  assert(
+    musicBypassFrom(autoplayMainWorld) === musicBypassFrom(autoplayContent),
+    "autoplay-guard content and main-world should share the same music-host bypass."
+  );
+
+  assert(
+    autoplayMainWorld.includes("sessionUnlocked") &&
+      autoplayMainWorld.includes("pointerdown") &&
+      autoplayMainWorld.includes("pageGestured"),
+    "autoplay-guard should unlock on a click so a late play() can start the video."
+  );
 
   const youtubeAutoplaySource = read(path.join(SHARED, "youtube-controls", "content.js"));
   assert(
     !youtubeAutoplaySource.includes("new MutationObserver"),
     "youtube-controls should avoid a page-wide observer on YouTube's high-churn SPA."
+  );
+  assert(
+    youtubeAutoplaySource.includes("isPlaylistContext") &&
+      youtubeAutoplaySource.includes('.has("list")') &&
+      youtubeAutoplaySource.includes("getPlaylistId") &&
+      youtubeAutoplaySource.includes("queueGraceUntil"),
+    "youtube-controls should leave playlist and mix queues alone."
+  );
+
+  const youtubeResumeSource = read(path.join(SHARED, "youtube-resume", "content.js"));
+  assert(
+    youtubeResumeSource.includes("isPlaylistUrl") &&
+      youtubeResumeSource.includes('searchParams.has("list")'),
+    "youtube-resume should skip playlist restore"
   );
 
   const volumeManifest = json(path.join(SHARED, "volume-boost", "manifest.chrome.json"));
@@ -739,7 +821,113 @@ async function runBackgroundUnitTests() {
     );
   }
 
+  {
+    const alarms = createEventHook();
+    const activated = createEventHook();
+    const updated = createEventHook();
+    const removed = createEventHook();
+    const message = createEventHook();
+    const calls = { createdAlarms: [], discardedTabs: [] };
+    const syncStorage = createStorageArea({
+      thresholdMin: 5,
+      excludeHosts: []
+    });
+    const localStorage = createStorageArea({
+      activityByTab: { "2": Date.now() - 10 * 60 * 1000 }
+    });
 
+    const chrome = {
+      runtime: {
+        lastError: null,
+        onInstalled: createEventHook(),
+        onStartup: createEventHook(),
+        onMessage: message
+      },
+      storage: {
+        sync: syncStorage,
+        local: localStorage
+      },
+      alarms: {
+        create(name, options) {
+          calls.createdAlarms.push({ name, options });
+        },
+        onAlarm: alarms
+      },
+      tabs: {
+        onActivated: activated,
+        onUpdated: updated,
+        onRemoved: removed,
+        query(queryInfo, callback) {
+          callback([
+            {
+              id: 2,
+              url: "https://example.com/article",
+              active: false,
+              pinned: false,
+              audible: false,
+              discarded: false
+            }
+          ]);
+        },
+        get(tabId, callback) {
+          callback({
+            id: tabId,
+            url: "https://example.com/article",
+            lastAccessed: Date.now() - 10 * 60 * 1000
+          });
+        },
+        discard(tabId, callback) {
+          calls.discardedTabs.push(tabId);
+          callback({ id: tabId, discarded: true });
+        }
+      }
+    };
+
+    loadBackgroundScript(path.join(SHARED, "tab-sleeper", "background.js"), chrome);
+    assert(
+      calls.createdAlarms.some((entry) => entry.name === "sweep"),
+      "tab-sleeper should create the periodic sweep alarm at startup."
+    );
+    alarms.listeners[0]({ name: "sweep" });
+    await delay(20);
+    assert(
+      calls.discardedTabs.includes(2),
+      "tab-sleeper should discard an idle background tab that is over the threshold."
+    );
+  }
+
+  {
+    const listeners = {};
+    function HTMLMediaElement() {}
+    HTMLMediaElement.prototype.play = function () { return Promise.resolve("played"); };
+    const sandbox = {
+      location: { hostname: "www.example-news.com" },
+      navigator: { userActivation: { isActive: false, hasBeenActive: false } },
+      document: {
+        readyState: "complete",
+        querySelectorAll() { return []; },
+        addEventListener(type, fn) { (listeners[type] || (listeners[type] = [])).push(fn); }
+      },
+      HTMLMediaElement,
+      Promise,
+      DOMException,
+      CustomEvent: function CustomEvent() {}
+    };
+    sandbox.window = sandbox;
+    vm.runInNewContext(read(path.join(SHARED, "autoplay-guard", "main-world.js")), sandbox);
+    const el = new HTMLMediaElement();
+    let blocked = false;
+    await HTMLMediaElement.prototype.play.call(el).then(
+      () => { throw new Error("page-load autoplay should still be blocked"); },
+      () => { blocked = true; }
+    );
+    assert(blocked, "autoplay-guard should still block page-load autoplay");
+    assert(listeners.pointerdown && listeners.pointerdown.length, "autoplay-guard should listen for a click");
+    listeners.pointerdown.forEach((fn) => fn({ type: "pointerdown" }));
+    sandbox.navigator.userActivation.isActive = false;
+    const late = await HTMLMediaElement.prototype.play.call(el);
+    assert(late === "played", "autoplay-guard should start a video after a click even if play() is late");
+  }
 }
 
 async function runBrowserSmokeTests() {
@@ -782,11 +970,46 @@ async function runBrowserSmokeTests() {
         <p id="blocked" style="user-select:none">Selection is blocked by the page.</p>
       </body></html>`
     },
+    "/cookie": {
+      body: `<!doctype html><html><body>
+        <div id="onetrust-banner-sdk">
+          <button id="onetrust-reject-all-handler">Reject all</button>
+          <button id="onetrust-accept-btn-handler">Accept all</button>
+        </div>
+        <script>
+          window.flags = { reject: 0, accept: 0 };
+          document.getElementById('onetrust-reject-all-handler').addEventListener('click', () => {
+            window.flags.reject += 1;
+            document.getElementById('onetrust-banner-sdk').remove();
+          });
+          document.getElementById('onetrust-accept-btn-handler').addEventListener('click', () => {
+            window.flags.accept += 1;
+          });
+        </script>
+      </body></html>`
+    },
+    "/cookie-navigate": {
+      body: `<!doctype html><html><body>
+        <div class="cookie-banner">
+          <p>Cookie choices</p>
+          <a id="cookie-continue-link" href="/cookie-settings">Continue</a>
+        </div>
+      </body></html>`
+    },
+    "/cookie-settings": {
+      body: "<!doctype html><html><body><h1>Cookie settings</h1></body></html>"
+    },
     "/autoplay-csp": {
       headers: {
         "Content-Security-Policy": "default-src 'self'; script-src 'self'; object-src 'none'"
       },
       body: "<!doctype html><html><body><p>Autoplay test</p></body></html>"
+    },
+    "/autoplay-queue": {
+      body: `<!doctype html><html><body>
+        <button id="start" style="display:block;width:120px;height:40px">start</button>
+        <video id="player" muted playsinline></video>
+      </body></html>`
     },
     "/autoplay-existing": {
       body: `<!doctype html><html><body>
@@ -805,6 +1028,29 @@ async function runBrowserSmokeTests() {
     "/be": {
       body: `<!doctype html><html><body><div id="root">ปี 2568</div></body></html>`
     },
+    "/shorts/demo": {
+      body: `<!doctype html><html><body>
+        <ytd-shorts>
+          <div id="shorts-player" class="html5-video-player">
+            <video id="shorts-video"></video>
+          </div>
+        </ytd-shorts>
+        <script>
+          const video = document.getElementById('shorts-video');
+          const realPause = video.pause.bind(video);
+          window.pauseCalls = 0;
+          video.pause = () => { window.pauseCalls += 1; realPause(); };
+          window.firePlay = (seconds) => {
+            Object.defineProperty(video, 'currentTime', { value: seconds, configurable: true });
+            video.dispatchEvent(new Event('play'));
+          };
+          window.firePlaying = (seconds) => {
+            Object.defineProperty(video, 'currentTime', { value: seconds, configurable: true });
+            video.dispatchEvent(new Event('playing'));
+          };
+        </script>
+      </body></html>`
+    },
     "/watch": {
       body: `<!doctype html><html><body>
         <div id="movie_player" class="html5-video-player">
@@ -813,7 +1059,7 @@ async function runBrowserSmokeTests() {
             aria-label="Seek slider" aria-keyshortcuts="c ArrowLeft ArrowRight"
             style="display:block;width:400px;height:24px;pointer-events:auto"></div>
           <button class="ytp-subtitles-button ytp-button" aria-label="Subtitles/closed captions (c)" aria-pressed="true"></button>
-          <video id="player-video"></video>
+          <video id="player-video" style="display:block;width:320px;height:180px"></video>
         </div>
         <script>
           const video = document.getElementById('player-video');
@@ -895,6 +1141,91 @@ async function runBrowserSmokeTests() {
           player.getAvailableQualityLevels = () => ['hd2160', 'hd1440', 'hd1080', 'hd720'];
           player.setPlaybackQualityRange = (min, max) => { window.qualityCalls.push({ min, max }); };
           player.setPlaybackQuality = (value) => { window.qualityCalls.push({ value }); };
+        </script>
+      </body></html>`
+    },
+    /*
+     * A stand-in for a YouTube watch page. The <video> reports a settled player
+     * with a known duration, and records every seek, so a test can prove where
+     * youtube-resume put the playhead without loading real media.
+     */
+    "/watch?v=RESUMETEST": {
+      body: `<!doctype html><html><body>
+        <div id="movie_player"><video class="html5-main-video"></video></div>
+        <script>
+          window.seeks = [];
+          window.pauses = 0;
+          const video = document.querySelector('video');
+          let position = 0;
+          Object.defineProperty(video, 'currentTime', {
+            get: () => position,
+            set: (value) => { position = value; window.seeks.push(value); }
+          });
+          Object.defineProperty(video, 'duration', { get: () => 600 });
+          Object.defineProperty(video, 'readyState', { get: () => 4 });
+          Object.defineProperty(video, 'paused', { get: () => true });
+          video.pause = () => { window.pauses += 1; };
+        </script>
+      </body></html>`
+    },
+    "/watch?v=RESUMETEST&t=90": {
+      body: `<!doctype html><html><body>
+        <div id="movie_player"><video class="html5-main-video"></video></div>
+        <script>
+          window.seeks = [];
+          window.pauses = 0;
+          const video = document.querySelector('video');
+          let position = 0;
+          Object.defineProperty(video, 'currentTime', {
+            get: () => position,
+            set: (value) => { position = value; window.seeks.push(value); }
+          });
+          Object.defineProperty(video, 'duration', { get: () => 600 });
+          Object.defineProperty(video, 'readyState', { get: () => 4 });
+          Object.defineProperty(video, 'paused', { get: () => true });
+          video.pause = () => { window.pauses += 1; };
+        </script>
+      </body></html>`
+    },
+    /*
+     * The same page with youtube-controls' furniture on it, so the two YouTube
+     * extensions can be proven to run side by side without fighting.
+     */
+    "/watch?v=BOTHTEST": {
+      body: `<!doctype html><html><body>
+        <div id="movie_player" class="html5-video-player">
+          <button class="ytp-autonav-toggle-button" aria-label="Autoplay is on"></button>
+          <button class="ytp-subtitles-button ytp-button" aria-label="Subtitles/closed captions (c)" aria-pressed="true"></button>
+          <video id="player-video" class="html5-main-video"></video>
+        </div>
+        <script>
+          window.seeks = [];
+          window.pauseCalls = 0;
+          window.toggleClicks = 0;
+          window.captionClicks = 0;
+          const video = document.getElementById('player-video');
+          let position = 0;
+          Object.defineProperty(video, 'currentTime', {
+            get: () => position,
+            set: (value) => { position = value; window.seeks.push(value); }
+          });
+          Object.defineProperty(video, 'duration', { get: () => 600 });
+          Object.defineProperty(video, 'readyState', { get: () => 4 });
+          Object.defineProperty(video, 'paused', { get: () => true });
+          video.pause = () => { window.pauseCalls += 1; };
+          const button = document.querySelector('.ytp-autonav-toggle-button');
+          button.addEventListener('click', () => {
+            window.toggleClicks += 1;
+            const next = button.getAttribute('aria-label') === 'Autoplay is on'
+              ? 'Autoplay is off'
+              : 'Autoplay is on';
+            button.setAttribute('aria-label', next);
+          });
+          const captions = document.querySelector('.ytp-subtitles-button');
+          captions.addEventListener('click', () => {
+            window.captionClicks += 1;
+            captions.setAttribute('aria-pressed', 'false');
+          });
         </script>
       </body></html>`
     },
@@ -1084,6 +1415,59 @@ async function runBrowserSmokeTests() {
 
     {
       const edge = await startEdge(
+        path.join(ROOT, "dist", "chrome", "cookie-quiet")
+      );
+      try {
+        const page = await edge.newPage();
+        await navigate(page, `${baseUrl}/cookie`, 1800);
+        const result = JSON.parse(
+          await evaluate(
+            page,
+            `JSON.stringify({
+              reject: window.flags.reject,
+              accept: window.flags.accept,
+              bannerPresent: !!document.getElementById('onetrust-banner-sdk')
+            })`
+          )
+        );
+        assert(
+          result.reject === 1 && result.accept === 0 && result.bannerPresent === false,
+          "cookie-quiet should reject instead of accept and remove the banner."
+        );
+        page.close();
+      } finally {
+        await edge.close();
+      }
+    }
+
+    {
+      const edge = await startEdge(
+        path.join(ROOT, "dist", "chrome", "cookie-quiet")
+      );
+      try {
+        const page = await edge.newPage();
+        await navigate(page, `${baseUrl}/cookie-navigate`, 1800);
+        const result = JSON.parse(
+          await evaluate(
+            page,
+            `JSON.stringify({
+              path: location.pathname,
+              bannerPresent: !!document.querySelector('.cookie-banner')
+            })`
+          )
+        );
+        assert(
+          result.path === "/cookie-navigate",
+          "cookie-quiet should ignore navigational cookie links instead of following them."
+        );
+        page.close();
+      } finally {
+        await edge.close();
+      }
+    }
+
+    {
+      const edge = await startEdge(
         path.join(ROOT, "dist", "chrome", "autoplay-guard")
       );
       try {
@@ -1139,6 +1523,62 @@ async function runBrowserSmokeTests() {
           "autoplay-guard should reject new autoplay without pausing existing media."
         );
         existingPage.close();
+
+        const queuePage = await edge.newPage();
+        await navigate(queuePage, `${baseUrl}/autoplay-queue`, 1200);
+        const startRect = JSON.parse(
+          await evaluate(
+            queuePage,
+            `(() => {
+              const rect = document.getElementById('start').getBoundingClientRect();
+              return JSON.stringify({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+            })()`
+          )
+        );
+        await queuePage.send("Input.dispatchMouseEvent", {
+          type: "mousePressed",
+          x: startRect.x,
+          y: startRect.y,
+          button: "left",
+          clickCount: 1
+        });
+        await queuePage.send("Input.dispatchMouseEvent", {
+          type: "mouseReleased",
+          x: startRect.x,
+          y: startRect.y,
+          button: "left",
+          clickCount: 1
+        });
+        await delay(100);
+        const firstQueue = await evaluate(
+          queuePage,
+          `(async () => {
+            try {
+              await document.getElementById('player').play();
+              return 'resolved';
+            } catch (error) {
+              return error.name;
+            }
+          })()`,
+          true
+        );
+        const secondQueue = await evaluate(
+          queuePage,
+          `(async () => {
+            try {
+              await document.getElementById('player').play();
+              return 'resolved';
+            } catch (error) {
+              return error.name;
+            }
+          })()`,
+          true
+        );
+        assert(
+          firstQueue !== "NotAllowedError" && secondQueue !== "NotAllowedError",
+          "autoplay-guard should let a started queue play the next item."
+        );
+        queuePage.close();
       } finally {
         await edge.close();
       }
@@ -1266,14 +1706,76 @@ async function runBrowserSmokeTests() {
         const heldOnce = await evaluate(holdPage, "window.pauseCalls");
         assert(heldOnce === 1, "youtube-controls should hold the opening frame paused.");
 
+        // YouTube (especially Shorts) often re-fires play after a pause. Keep holding
+        // until a real user gesture reaches the player.
         await evaluate(holdPage, "window.firePlay(0)");
         await delay(100);
-        const heldTwice = await evaluate(holdPage, "window.pauseCalls");
+        const heldRetry = await evaluate(holdPage, "window.pauseCalls");
         assert(
-          heldTwice === 1,
-          "youtube-controls should hold a watch page paused only once, so pressing play sticks."
+          heldRetry === 2,
+          "youtube-controls should keep holding while YouTube re-fires play without a user gesture."
+        );
+
+        const videoRect = JSON.parse(
+          await evaluate(
+            holdPage,
+            `(() => {
+              const rect = document.getElementById('player-video').getBoundingClientRect();
+              return JSON.stringify({ x: rect.left + rect.width / 2, y: rect.top + Math.max(rect.height / 2, 4) });
+            })()`
+          )
+        );
+        await holdPage.send("Input.dispatchMouseEvent", {
+          type: "mousePressed",
+          x: videoRect.x,
+          y: videoRect.y,
+          button: "left",
+          clickCount: 1
+        });
+        await holdPage.send("Input.dispatchMouseEvent", {
+          type: "mouseReleased",
+          x: videoRect.x,
+          y: videoRect.y,
+          button: "left",
+          clickCount: 1
+        });
+        await delay(100);
+        await evaluate(holdPage, "window.firePlay(0)");
+        await delay(100);
+        const heldAfterTouch = await evaluate(holdPage, "window.pauseCalls");
+        assert(
+          heldAfterTouch === 2,
+          "youtube-controls should let play stick after the user touches the player."
         );
         holdPage.close();
+
+        const shortsPage = await edge.newPage();
+        await navigate(shortsPage, `${baseUrl}/shorts/demo`, 500);
+        await injectRuntimeSource(
+          shortsPage,
+          buildInjectedSource({
+            storageSync: { autoplayEnabled: false, captionsOff: true },
+            files: [path.join(SHARED, "youtube-controls", "content.js")]
+          })
+        );
+        await delay(600);
+        await evaluate(shortsPage, "window.firePlay(0)");
+        await delay(100);
+        await evaluate(shortsPage, "window.firePlay(0)");
+        await delay(100);
+        const shortsHeld = await evaluate(shortsPage, "window.pauseCalls");
+        assert(
+          shortsHeld === 2,
+          "youtube-controls should hold Shorts paused across YouTube's play retries."
+        );
+        await evaluate(shortsPage, "window.firePlaying(0)");
+        await delay(100);
+        const shortsPlayingHeld = await evaluate(shortsPage, "window.pauseCalls");
+        assert(
+          shortsPlayingHeld === 3,
+          "youtube-controls should also hold Shorts on the playing event."
+        );
+        shortsPage.close();
 
         const resumePage = await edge.newPage();
         await navigate(resumePage, `${baseUrl}/watch`, 500);
@@ -1319,6 +1821,71 @@ async function runBrowserSmokeTests() {
           "youtube-controls should let videos start when Open videos paused is off."
         );
         disabledPage.close();
+
+        const playlistPage = await edge.newPage();
+        await navigate(playlistPage, `${baseUrl}/watch?v=PLTEST&list=PLriah`, 500);
+        await injectRuntimeSource(
+          playlistPage,
+          buildInjectedSource({
+            storageSync: { autoplayEnabled: false, captionsOff: true },
+            files: [path.join(SHARED, "youtube-controls", "content.js")]
+          })
+        );
+        await delay(1500);
+        await evaluate(playlistPage, "window.firePlay(0)");
+        await delay(100);
+        const playlistHeld = JSON.parse(
+          await evaluate(
+            playlistPage,
+            `JSON.stringify({
+              pauses: window.pauseCalls,
+              clicks: window.toggleClicks,
+              label: document.querySelector('.ytp-autonav-toggle-button').getAttribute('aria-label')
+            })`
+          )
+        );
+        assert(
+          playlistHeld.pauses === 0,
+          "youtube-controls should not hold the next item in a playlist or mix."
+        );
+        assert(
+          playlistHeld.clicks === 0 && playlistHeld.label === "Autoplay is on",
+          "youtube-controls should leave YouTube autoplay alone inside a playlist or mix."
+        );
+        await evaluate(
+          playlistPage,
+          `(() => {
+            window.pauseCalls = 0;
+            history.replaceState({}, '', '/watch?v=PLTEST2&list=PLriah');
+            document.dispatchEvent(new Event('yt-navigate-finish'));
+          })()`
+        );
+        await delay(400);
+        await evaluate(playlistPage, "window.firePlay(0)");
+        await delay(100);
+        const playlistAdvance = await evaluate(playlistPage, "window.pauseCalls");
+        assert(
+          playlistAdvance === 0,
+          "youtube-controls should not re-arm the hold when a playlist advances."
+        );
+        await evaluate(
+          playlistPage,
+          `(() => {
+            window.pauseCalls = 0;
+            history.replaceState({}, '', '/watch?v=PLTEST3');
+            document.dispatchEvent(new Event('yt-navigate-finish'));
+            history.replaceState({}, '', '/watch?v=PLTEST3&list=PLriah');
+          })()`
+        );
+        await delay(500);
+        await evaluate(playlistPage, "window.firePlay(0)");
+        await delay(100);
+        const playlistRace = await evaluate(playlistPage, "window.pauseCalls");
+        assert(
+          playlistRace === 0,
+          "youtube-controls should not pause a playlist item if list= lands a moment late."
+        );
+        playlistPage.close();
       } finally {
         await edge.close();
       }
@@ -1386,6 +1953,151 @@ async function runBrowserSmokeTests() {
           "youtube-quality should cap the player quality at the stored ceiling."
         );
         page.close();
+      } finally {
+        await edge.close();
+      }
+    }
+
+    {
+      const edge = await startEdge();
+      try {
+        const savedPlace = { "place:RESUMETEST": { t: 412, d: 600, paused: true, at: 1 } };
+
+        // The whole point of the extension: come back where you were.
+        const page = await edge.newPage();
+        await navigate(page, `${baseUrl}/watch?v=RESUMETEST`, 500);
+        await injectRuntimeSource(
+          page,
+          buildInjectedSource({
+            storageLocal: savedPlace,
+            files: [path.join(SHARED, "youtube-resume", "content.js")]
+          })
+        );
+        await delay(2500);
+        const restored = JSON.parse(
+          await evaluate(
+            page,
+            "JSON.stringify({ seeks: window.seeks, pauses: window.pauses, at: document.querySelector('video').currentTime })"
+          )
+        );
+        assert(
+          restored.seeks.includes(412) && restored.at === 412,
+          "youtube-resume should put the playhead back at the saved place."
+        );
+        assert(
+          restored.pauses >= 1,
+          "youtube-resume should leave a video paused when that is how it was left."
+        );
+
+        /*
+         * A video sitting still must not keep writing to disk. Five save-forcing
+         * events, one write — the rest recognise that nothing moved.
+         */
+        const writes = JSON.parse(
+          await evaluate(
+            page,
+            `(() => {
+              const before = window.__riahTest.localSetCalls;
+              const video = document.querySelector('video');
+              for (let i = 0; i < 5; i += 1) video.dispatchEvent(new Event('pause'));
+              return JSON.stringify({ before, after: window.__riahTest.localSetCalls });
+            })()`
+          )
+        );
+        assert(
+          writes.after - writes.before === 1,
+          `A parked video should write once, not once per event (wrote ${writes.after - writes.before} times).`
+        );
+        page.close();
+
+        // A link that names its own time outranks the saved place.
+        const timed = await edge.newPage();
+        await navigate(timed, `${baseUrl}/watch?v=RESUMETEST&t=90`, 500);
+        await injectRuntimeSource(
+          timed,
+          buildInjectedSource({
+            storageLocal: savedPlace,
+            files: [path.join(SHARED, "youtube-resume", "content.js")]
+          })
+        );
+        await delay(2500);
+        const timedResult = JSON.parse(
+          await evaluate(timed, "JSON.stringify({ seeks: window.seeks })")
+        );
+        assert(
+          timedResult.seeks.length === 0,
+          "youtube-resume should not override a URL that already names a start time."
+        );
+        timed.close();
+
+        const playlistResume = await edge.newPage();
+        await navigate(playlistResume, `${baseUrl}/watch?v=RESUMETEST&list=PLriah`, 500);
+        await injectRuntimeSource(
+          playlistResume,
+          buildInjectedSource({
+            storageLocal: savedPlace,
+            files: [path.join(SHARED, "youtube-resume", "content.js")]
+          })
+        );
+        await delay(2500);
+        const playlistResumeResult = JSON.parse(
+          await evaluate(
+            playlistResume,
+            "JSON.stringify({ seeks: window.seeks, at: document.querySelector('video').currentTime })"
+          )
+        );
+        assert(
+          playlistResumeResult.seeks.length === 0 && playlistResumeResult.at === 0,
+          "youtube-resume should not jump or pause a playlist or mix item from an old place."
+        );
+        playlistResume.close();
+
+        // Both YouTube extensions on one page: each still does its own job.
+        const shared = await edge.newPage();
+        await navigate(shared, `${baseUrl}/watch?v=BOTHTEST`, 500);
+        await injectRuntimeSource(
+          shared,
+          buildInjectedSource({
+            storageSync: { autoplayEnabled: false, captionsOff: true, holdPaused: true },
+            storageLocal: { "place:BOTHTEST": { t: 412, d: 600, paused: true, at: 1 } },
+            files: [
+              path.join(SHARED, "youtube-controls", "content.js"),
+              path.join(SHARED, "youtube-resume", "content.js")
+            ]
+          })
+        );
+        await delay(3000);
+        const together = JSON.parse(
+          await evaluate(
+            shared,
+            `JSON.stringify({
+              at: document.querySelector('video').currentTime,
+              seeks: window.seeks,
+              pauseCalls: window.pauseCalls,
+              toggleClicks: window.toggleClicks,
+              autoplayLabel: document.querySelector('.ytp-autonav-toggle-button').getAttribute('aria-label'),
+              captionClicks: window.captionClicks,
+              captionsPressed: document.querySelector('.ytp-subtitles-button').getAttribute('aria-pressed')
+            })`
+          )
+        );
+        assert(
+          together.at === 412 && together.seeks.includes(412),
+          "youtube-resume should still restore the place with youtube-controls running on the same page."
+        );
+        assert(
+          together.toggleClicks === 1 && together.autoplayLabel === "Autoplay is off",
+          "youtube-controls should still turn autoplay off with youtube-resume running on the same page."
+        );
+        assert(
+          together.captionClicks === 1 && together.captionsPressed === "false",
+          "youtube-controls should still turn captions off with youtube-resume running on the same page."
+        );
+        assert(
+          together.pauseCalls >= 1,
+          "A restored video that was left paused should come back paused, not playing."
+        );
+        shared.close();
       } finally {
         await edge.close();
       }

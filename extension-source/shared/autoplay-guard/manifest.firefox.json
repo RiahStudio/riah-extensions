@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Riah Autoplay Guard",
-  "version": "0.2.0",
-  "description": "Blocks unwanted media autoplay outside YouTube without pausing media you started.",
+  "version": "0.2.4",
+  "description": "Blocks unwanted media autoplay outside music sites without pausing media you started.",
   "icons": {
     "32": "icons/32.png",
     "128": "icons/128.png"

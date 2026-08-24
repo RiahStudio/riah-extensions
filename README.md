@@ -4,95 +4,100 @@
 
 **Riah Extensions** is a public set of small browser extensions from Riah Studio for Chrome, Edge, Brave, and Firefox. Each extension does one job (autoplay guard, paste restore, YouTube controls, and similar), uses minimal permissions, and ships without telemetry or remote config. Limitations: not every extension ships on every browser when the browser already covers that job natively.
 
-Other people's browser extensions get bought by companies you did not choose. The new owner can change the code while you keep the same install. [Pieter Levels](https://levels.io/open-sourced-chrome-extension-superlevels) has been loud about that risk, and he is right.
 
-These are small extensions I actually use. You can load them if you want. The better use is to point your agent at this repo and rebuild your own versions from the source. I do not expect you to run my exact set.
+Small, readable browser extensions from Riah Studio. Each extension is scoped to
+one job, uses minimal permissions, and avoids telemetry, remote code, and remote
+configuration.
 
-Each one does one job. Minimal permissions. No telemetry. No remote scripts. No remote config. Pink Riah icons so you can tell them apart on the toolbar.
+## Publishable Extensions
 
-## What I use them for
+Chrome, Edge and Brave are all Chromium and take the byte-identical package, so
+there is one Chromium build and one Firefox build — not four. Each store still
+gets its own zip under `release/`.
 
-| | Extension | What it does |
-| --- | --- | --- |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/autoplay-guard/icons/128.png" width="40" alt="" /> | **Autoplay Guard** | Blocks unwanted media autoplay outside YouTube. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/cookie-quiet/icons/128.png" width="40" alt="" /> | **Cookie Quiet** | Dismisses or rejects cookie consent banners. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/library-search/icons/128.png" width="40" alt="" /> | **Library Search** | Opens a configured library or catalog search from book pages. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/paste-guard/icons/128.png" width="40" alt="" /> | **Paste Guard** | Restores paste where sites try to block it. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/right-click-restorer/icons/128.png" width="40" alt="" /> | **Right Click Restorer** | Restores right-click, copy, selection, and image drag. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/tab-anchor/icons/128.png" width="40" alt="" /> | **Tab Anchor** | Puts accidentally detached tabs back where they belong. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/tab-sleeper/icons/128.png" width="40" alt="" /> | **Tab Sleeper** | Discards idle tabs on a timer (Firefox). |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/tenhou-english/icons/128.png" width="40" alt="" /> | **Tenhou English** | English labels on Tenhou. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/thai-year-helper/icons/128.png" width="40" alt="" /> | **Thai Year Helper** | Gregorian year next to Thai Buddhist Era years. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/timeline-exporter/icons/128.png" width="40" alt="" /> | **Timeline Exporter** | Exports visible X posts to a local CSV. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/volume-boost/icons/128.png" width="40" alt="" /> | **Volume Boost** | Boosts or mutes the current tab. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/youtube-controls/icons/128.png" width="40" alt="" /> | **YouTube Controls** | Opens watch pages and Shorts paused. Keeps autoplay and captions where you want them. |
-| <img src="https://raw.githubusercontent.com/RiahStudio/riah-extensions/main/extension-source/shared/youtube-quality/icons/128.png" width="40" alt="" /> | **YouTube Quality** | Caps YouTube quality at your preferred ceiling. |
+| Extension | Source slug | Browsers | What it does |
+| --- | --- | --- | --- |
+| Riah Autoplay Guard | `autoplay-guard` | Chrome, Edge, Firefox | Blocks unwanted media autoplay outside music sites. |
+| Riah Cookie Quiet | `cookie-quiet` | Chrome, Edge | Dismisses or rejects cookie consent banners. |
+| Riah Library Search | `library-search` | Chrome, Edge, Firefox | Opens a configured library/catalog search from supported book pages. |
+| Riah Paste Guard | `paste-guard` | Chrome, Edge, Firefox | Restores paste in fields where websites try to block it. |
+| Riah Right Click Restorer | `right-click-restorer` | Chrome, Edge, Firefox | Restores right-click, copy, selection, and image drag behavior. |
+| Riah Tab Anchor | `tab-anchor` | Chrome, Edge, Firefox | Moves accidentally detached tabs back to their original window. |
+| Riah Tab Sleeper | `tab-sleeper` | Firefox | Discards idle tabs to free memory, on a timer. |
+| Riah Tenhou English | `tenhou-english` | Chrome, Edge, Firefox | Adds English UI labels to Tenhou. |
+| Riah Thai Year Helper | `thai-year-helper` | Chrome, Edge, Firefox | Adds Gregorian year context beside Thai Buddhist Era years. |
+| Riah Timeline Exporter | `timeline-exporter` | Chrome, Edge, Firefox | Exports visible X/Twitter posts to a local CSV file. |
+| Riah Volume Boost | `volume-boost` | Chrome, Edge | Boosts or mutes current-tab audio. |
+| Riah YouTube Controls | `youtube-controls` | Chrome, Edge, Firefox | Opens watch pages paused and keeps autoplay and captions in the preferred state. |
+| Riah YouTube Resume | `youtube-resume` | Chrome, Edge, Firefox | Puts you back where you were in a YouTube video after the tab is discarded or reopened. |
+| Riah YouTube Quality | `youtube-quality` | Chrome, Edge, Firefox | Sets YouTube playback quality up to a preferred ceiling. |
 
-Slug folders live under `extension-source/shared/<slug>/`.
+## Two extensions ship to some browsers and not others
 
-## Point an agent at this repo
+An extension is only worth installing where the browser does not already do the
+job. Two of the set are therefore deliberately partial, expressed by which
+manifests they ship (`manifest.chrome.json` / `manifest.firefox.json`) — the
+build and the static audit both enforce it.
 
-That is the main point of publishing these.
+| Extension | Chrome / Edge | Brave | Firefox |
+| --- | --- | --- | --- |
+| **Riah Cookie Quiet** | **ships** — no native consent-notice blocking | not needed; Shields does it | not needed; Firefox's own banner blocker is one toggle in Settings → Privacy & Security |
+| **Riah Tab Sleeper** | not needed; Chrome Memory Saver and Edge Sleeping Tabs | not needed; Memory Saver | **ships** — Firefox unloads only under memory pressure, with no idle timer |
+| **Riah Volume Boost** | **ships** | ships | not possible; Firefox has no `tabCapture` or offscreen API |
 
-1. Clone the repo, or open it in Cursor / Claude Code / Codex / whatever you use.
-2. Inventory what you already run: `node scripts/inventory-extensions.mjs` (Brave by default). Paste the output to the agent, or let it read your profile.
-3. Ask for a triage: what to replace, what to keep, what one job to rebuild first.
-4. Keep the readable one-job shape. Change the behavior until it is yours.
-5. Load the unpacked build yourself and read the source before you trust it.
+Brave takes the Chromium package minus Cookie Quiet; its exact daily set lives in
+`Brave Migration/brave-migration.json`.
 
-Full loop (inventory, replace-vs-keep, template): [docs/BUILD-YOUR-OWN.md](docs/BUILD-YOUR-OWN.md).
+## Retired 2026-07-29 — the browser now does these itself
 
-You can also install these as-is. Treat that as a starting point, not a brand loyalty program.
+Deleted once every target browser shipped the same behavior natively. Rebuilding
+them would only add a second thing to maintain and trust.
 
-## Brave first
+| Retired | Replaced by, everywhere |
+| --- | --- |
+| `site-zoom` | Native per-site zoom |
+| `zoom-baseline` | The browser's own default zoom preference |
+| `page-translator` | Native page translation |
+| `selection-translator` | Native translation, including selected text |
 
-I live on these in **Brave**. That is the tested path.
+Their source is preserved under `public-export/riah-extensions/extension-source/`
+if any of that ever regresses.
 
-Chrome and Firefox packages are in the tree because Chromium packages share a build, and Firefox has its own manifests where they make sense. I have not finished loading and testing those browsers myself yet, so this repo is not a Chrome Web Store or Firefox Add-ons launch claim.
-
-If you want them on Chrome or Firefox, fork the source and verify there before you depend on them.
-
-## Load in Brave (unpacked)
-
-1. Build:
+## Quick Start
 
 ```powershell
 npm test
 npm run build
+npm run package:public
 ```
 
-2. Open `brave://extensions`, turn on Developer mode, Load unpacked.
-3. Point at folders under `extension-source/dist/chrome/` (Tab Sleeper is Firefox-only).
+Build output is generated under `extension-source/dist/`. Store-ready
+ZIP files are generated under `release/`.
 
-Or double-click `Start All Riah Extensions in Brave.bat` for a disposable Brave profile.
+For a clean public GitHub seed, run:
 
-## Why they are split up
+```powershell
+npm run export:public
+```
 
-One extension per job is easier to audit, easier for an agent to copy, and easier to delete when the browser finally ships the feature itself.
+That writes `public-export/riah-extensions/` with only public source, tests,
+docs, brand assets, and release scripts. Use that export as the public repo
+source instead of publishing this full local workspace.
 
-Already retired when native tools took over: site zoom, default zoom, page translate, selection translate.
+## Local Brave Check
 
-Some tools only ship where the browser is missing them. Cookie Quiet is for Chromium browsers without a solid native banner blocker. Tab Sleeper is Firefox-only. Volume Boost needs Chromium tabCapture.
+Run `Start All Riah Extensions in Brave.bat --check` to rebuild the Chromium
+packages and verify the current load-unpacked set without opening Brave.
+
+Double-click `Start All Riah Extensions in Brave.bat` to open the current
+Chromium build in a dedicated disposable Brave profile for manual testing.
 
 ## Docs
 
-- `PRIVACY.md`
-- `SECURITY.md`
-- `SUPPORT.md`
-- `docs/PUBLISHING.md`
-- `docs/brand/` for the pink icon system
-
-## Buy me a coffee
-
-These are free. If they helped, you can [buy me a coffee](https://buymeacoffee.com/riahstudio).
-
-## Credit
-
-Pieter Levels wrote about extensions getting bought by spyware and malware outfits, and about open-sourcing tools you can audit or customize with AI. Start here: [levels.io/open-sourced-chrome-extension-superlevels](https://levels.io/open-sourced-chrome-extension-superlevels). This repo is my version of that idea: small readable sources you can steal from on purpose.
-
-## Build your own
-
-Do not start by guessing. Scan what is installed, decide what is worth replacing, then rebuild one small job.
-
-- Inventory: `node scripts/inventory-extensions.mjs`
-- Guide: [docs/BUILD-YOUR-OWN.md](docs/BUILD-YOUR-OWN.md)
+- `PRIVACY.md` covers extension data handling.
+- `SECURITY.md` covers security reporting and maintenance expectations.
+- `SUPPORT.md` covers support links and the small donation link policy.
+- `docs/PUBLISHING.md` covers packaging and store review prep.
+- `docs/STORE-LISTINGS.md` contains first-pass listing copy.
+- `docs/PUBLIC-NAMING.md` records the public naming rules.
+- `docs/brand/` contains the official Riah icon system.

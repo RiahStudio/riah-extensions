@@ -6,11 +6,11 @@ Persists the preferred YouTube autoplay, caption, and opening-playback state on 
 
 Every time a YouTube watch page loads, ensure the autoplay toggle matches the saved preference, turn captions off when that independent preference is enabled, and hold the video paused on its opening frame when that independent preference is enabled.
 
-Shorts get the same open-paused hold. Autonav and captions controls stay watch-page only.
+Shorts get the same open-paused hold. Autonav and captions controls stay watch-page only. Playlist, mix, and album queues keep YouTube's own next-item behavior: do not hold them paused and do not force the autoplay toggle off. Treat a queue as a playlist when the watch URL has `list=`, when YouTube's playlist panel is visible, or when the player reports a playlist id. If `list=` lags one frame on SPA advance, do not re-arm the hold until that settles.
 
 ## Target folder
 
-`Riah Extensions from Codex/shared/youtube-controls/`
+`extension-source/shared/youtube-controls/`
 
 ## Files
 
@@ -37,7 +37,8 @@ On navigation to a `/watch` URL:
 6. Click that exact button only when `aria-pressed="true"`; never use keyboard-shortcut, text, or generic ARIA fallbacks.
 7. Never restyle controls or change pointer events.
 8. Handle YouTube SPA navigation and late player-control insertion with bounded watch-page retries, without a page-wide mutation observer.
-9. Hold the opening frame paused through capture-phase `play` and `playing` listeners on `/watch` and `/shorts/*`, and only while every guard holds: the preference is on, the page is a hold page, the media sits inside the player, the video is under two seconds in, the page armed under twenty seconds ago, and no trusted pointer or key event has reached the player since arming.
+9. Hold the opening frame paused through capture-phase `play` and `playing` listeners on `/watch` and `/shorts/*`, and only while every guard holds: the preference is on, the page is a hold page, the page is not a playlist/mix/album queue, the media sits inside the player, the video is under two seconds in, the page armed under twenty seconds ago, no queue-advance grace window is open, and no trusted pointer or key event has reached the player since arming.
+10. If the page is a playlist, mix, or album queue, skip the autoplay-toggle preference and skip re-arming the open-paused hold on `yt-navigate-finish`. Captions still follow the saved preference. If `list=` is missing for a moment after a queue advance, wait briefly before arming so the next item is not paused.
 
 ## Open-paused guards
 
@@ -57,4 +58,6 @@ Shorts often re-fire `play` after one pause. The hold keeps pausing while the gu
 - Opening a Short with Open videos paused enabled: the Short holds paused even if YouTube re-fires play, until the user touches it.
 - A video already past its opening seconds is never paused, so fullscreen, resize, and relayout leave playback alone.
 - With Open videos paused disabled, Riah never pauses anything.
+- A playlist, mix, or album queue is never held paused, and its autoplay toggle is left alone so the next item can play.
+- A playlist advance whose `list=` parameter lands a moment late is still not paused.
 - Every unrelated YouTube control remains untouched.

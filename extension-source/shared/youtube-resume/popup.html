@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riah YouTube Resume</title>
+    <style>
+      :root { font-family: "Segoe UI", Tahoma, sans-serif; }
+      body { margin: 0; min-width: 280px; background: #fff8ef; color: #241f17; }
+      main { padding: 16px; display: grid; gap: 10px; }
+      h1 { margin: 0; font-size: 18px; }
+      label.check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+      label.check input { margin-top: 2px; }
+      button { font: inherit; padding: 10px 12px; border: none; border-radius: 10px; background: #1f2430; color: #fff; cursor: pointer; }
+      button.quiet { background: #ece2d4; color: #241f17; }
+      #count { font-size: 12px; color: #5b6270; }
+      #status { min-height: 1.3em; font-size: 12px; color: #5b6270; }
+      p.note { margin: 0; font-size: 12px; color: #5b6270; }
+    </style>
+    <link rel="stylesheet" href="brand-links/support.css">
+  </head>
+  <body>
+    <main>
+      <h1>Riah YouTube Resume</h1>
+      <label class="check">
+        <input id="enabled" type="checkbox">
+        <span>Remember where I was in each video</span>
+      </label>
+      <label class="check">
+        <input id="holdPaused" type="checkbox">
+        <span>Come back paused if I left it paused</span>
+      </label>
+      <div id="count"></div>
+      <button id="forget" class="quiet" type="button">Forget saved places</button>
+      <p class="note">
+        Saved on this computer only. A link with its own timestamp always wins.
+      </p>
+      <div id="status"></div>
+    </main>
+    <script src="popup.js"></script>
+    <script src="brand-links/support.js"></script>
+  </body>
+</html>

@@ -15,7 +15,7 @@ shared/<slug>/              source of truth
 dist/                       generated and gitignored
   chrome/<slug>/            load-unpacked Chromium package
     manifest.json           copied from manifest.chrome.json
-  firefox/<slug>/           load-temporary Firefox package
+  firefox/<slug>/           Firefox package (sign via AMO for a lasting install)
     manifest.json           copied from manifest.firefox.json
 ```
 
@@ -74,14 +74,14 @@ Chromium browsers:
 2. Enable Developer mode.
 3. Load unpacked from `dist/chrome/<slug>/`.
 
-Firefox:
+Firefox (permanent):
 
-1. Open `about:debugging#/runtime/this-firefox`.
-2. Load Temporary Add-on.
-3. Pick `dist/firefox/<slug>/manifest.json`.
+1. Pack `dist/firefox/<slug>/` as an `.xpi` with `manifest.json` at the zip root.
+2. Mozilla-sign it unlisted (On your own) at addons.mozilla.org/developers.
+3. about:addons, gear, Install Add-on From File, pick the signed `.xpi`.
+4. Do not use Load Temporary Add-on unless a short test is requested.
 
-For public distribution, upload signed packages through the relevant browser
-store.
+Brave/Chrome unpacked loads already persist across restart.
 
 ## Build Chain
 

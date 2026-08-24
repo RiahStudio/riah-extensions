@@ -23,6 +23,42 @@
     return location.pathname === "/shorts" || location.pathname.startsWith("/shorts/");
   }
 
+  function playlistPanelVisible() {
+    const panel = document.querySelector("ytd-playlist-panel-renderer");
+    if (!panel) {
+      return false;
+    }
+    const style = window.getComputedStyle(panel);
+    return (
+      style.display !== "none" &&
+      style.visibility !== "hidden" &&
+      panel.getClientRects().length > 0
+    );
+  }
+
+  function playerPlaylistId() {
+    const player = document.querySelector("#movie_player");
+    try {
+      const id =
+        player && typeof player.getPlaylistId === "function" && player.getPlaylistId();
+      return typeof id === "string" && id.length > 0;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // Playlists, mixes, and albums. URL list= can lag one frame on SPA advance.
+  function isPlaylistContext() {
+    const listed =
+      new URLSearchParams(location.search).has("list") ||
+      playlistPanelVisible() ||
+      playerPlaylistId();
+    if (listed) {
+      queueHoldOff = true;
+    }
+    return listed;
+  }
+
   // Open-paused covers watch pages and Shorts. Autonav + captions stay watch-only.
   function isHoldPage() {
     return isWatchPage() || isShortsPage();
@@ -162,10 +198,12 @@
       }
 
       attempts += 1;
-      const autoplayButton = findAutoplayButton();
+      const skipAutoplayPref = isPlaylistContext();
+      const autoplayButton = skipAutoplayPref ? null : findAutoplayButton();
       const autoplayState = autoplayButton ? readToggleState(autoplayButton) : null;
       const autoplayResolved =
-        autoplayState !== null && autoplayState === autoplayEnabled;
+        skipAutoplayPref ||
+        (autoplayState !== null && autoplayState === autoplayEnabled);
 
       if (autoplayButton && autoplayState !== null && !autoplayResolved) {
         forceButtonClick(autoplayButton);
@@ -201,6 +239,8 @@
   let holdLoaded = false;
   let holdArmedAt = Date.now();
   let playerTouched = false;
+  let queueHoldOff = false;
+  let queueGraceUntil = 0;
 
   function insidePlayer(node) {
     return !!node?.closest?.(
@@ -219,6 +259,8 @@
       holdWanted &&
       !playerTouched &&
       isHoldPage() &&
+      !isPlaylistContext() &&
+      Date.now() >= queueGraceUntil &&
       Date.now() - holdArmedAt <= HOLD_WINDOW_MS &&
       Number(video?.currentTime || 0) <= HOLD_MAX_SECONDS
     );
@@ -273,11 +315,31 @@
     .catch((error) => console.warn(error.message));
 
   document.addEventListener("yt-navigate-finish", () => {
-    armHold();
+    if (isPlaylistContext()) {
+      queueHoldOff = true;
+      playerTouched = true;
+      queueGraceUntil = 0;
+    } else if (queueHoldOff) {
+      queueGraceUntil = Date.now() + 400;
+      window.setTimeout(() => {
+        if (isPlaylistContext()) {
+          playerTouched = true;
+          queueGraceUntil = 0;
+          return;
+        }
+        queueHoldOff = false;
+        queueGraceUntil = 0;
+        armHold();
+      }, 400);
+    } else {
+      queueHoldOff = false;
+      queueGraceUntil = 0;
+      armHold();
+    }
     setTimeout(scheduleApply, 400);
   });
   document.addEventListener("yt-page-data-updated", () => {
-    if (isShortsPage()) {
+    if (isShortsPage() && !isPlaylistContext()) {
       armHold();
     }
     scheduleApply();

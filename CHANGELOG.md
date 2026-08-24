@@ -1,20 +1,28 @@
 # Changelog
 
-## 2026-08-04 - Inventory + replace triage
+## 2026-08-24 - Brave playlists no longer skip
 
-- docs/BUILD-YOUR-OWN.md now covers the real loop: scan installed extensions, triage replace/keep/skip, then rebuild from _template or an existing slug.
-- Added scripts/inventory-extensions.mjs to read Brave/Chrome/Edge profiles on disk (no management permission).
-- README points agents at inventory first, not just "copy the template."
+- Riah YouTube Controls 0.3.3 still opens a single video paused, but a playlist, mix, or album keeps playing the next item even when YouTube is a moment late adding `list=` to the URL.
+- Riah YouTube Resume 0.1.1 still restores a discarded tab, but it does not jump or pause a playlist or mix item from an old saved place.
 
-## 2026-08-04 - Buy me a coffee on the README
+## 2026-08-24 - Click starts the video
 
-- Public README now carries a quiet Buy me a coffee link to https://buymeacoffee.com/riahstudio (popup footers already had it).
+- Riah Autoplay Guard 0.2.4 lets a click start a video once it is ready, instead of ignoring that click until a short timer happened to line up. Page-load autoplay with no click is still blocked.
 
-## 2026-08-04 - Public pitch: copy these, Brave first
 
-- README now leads with the Levels warning about store extensions getting sold, and the real ask: point an agent at the source and rebuild your own.
-- Pink extension icons sit near the top of the README so the set reads as a visual product, not a file dump.
-- Brave is named as the tested daily driver. Chrome and Firefox stay source-available until those browsers are loaded and checked.
+## 2026-08-24 - Music sites keep playing
+
+- Riah Autoplay Guard 0.2.3 leaves dedicated music, podcast, and radio players alone (Spotify, Apple Music, Bandcamp, Mixcloud, and the rest of that set), so the next track can play. News sites stay blocked.
+
+
+## 2026-08-24 - SoundCloud keeps playing
+
+- Riah Autoplay Guard 0.2.2 leaves SoundCloud (including the player frame) alone, so the next track can play in Firefox the same way it already does on YouTube.
+
+## 2026-08-19 - Playlists and music queues keep going
+
+- Riah YouTube Controls 0.3.2 leaves playlist, mix, and album watch URLs alone: no open-paused hold, and the autoplay toggle is not forced off, so the next item can play.
+- Riah Autoplay Guard 0.2.1 still blocks a site from starting media before you click, but after you start playback on a page the next track can play without another click.
 
 ## 2026-08-04 - Shorts open paused
 
@@ -22,6 +30,10 @@
 - Shorts often re-fire `play` after one pause; the hold now keeps pausing until you touch the player (or the short hold window ends), instead of spending itself on the first attempt.
 - Autonav + captions prefs stay watch-page only — Shorts do not use that control.
 
+## 2026-08-01 - Public GitHub release prepared
+
+- Clean public export rebuilt; missing `cookie-quiet` / `tab-sleeper` specs restored.
+- Fresh public release tree staged at `C:\Code\_publish\riah-extensions` (author Riah Harris, one clean commit). Private working repo stays private -- do not flip it.
 ## 2026-07-29 - Per-browser sets, own icons, and Edge packages
 
 - **Every extension now has its own glyph.** The old mapping reused a handful of

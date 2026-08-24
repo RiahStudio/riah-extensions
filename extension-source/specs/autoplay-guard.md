@@ -1,69 +1,50 @@
 # Spec: autoplay-guard
 
-General-purpose media autoplay blocker outside YouTube.
+General-purpose media autoplay blocker outside dedicated music sites.
 
 ## What it does
 
-On every page, intercept `<video>` and `<audio>` elements and pause them if they try to autoplay. Respect user-initiated play — only block autoplay at the "site tried to play without my click" level.
+Outside dedicated music players, intercept new `<video>` and `<audio>` play attempts that lack user activation. Never call `pause()` on media that is already playing. After the user has started playback on a page, later `play()` calls on that page are allowed so queues can advance. YouTube, SoundCloud, Spotify, Apple Music, Bandcamp, Mixcloud, and other dedicated music/podcast/radio hosts are a built-in bypass so the next track can play, including from widget frames that never received the original click (especially in Firefox). YouTube's after-video autoplay toggle stays with the dedicated Riah YouTube extension.
 
 ## Target folder
 
-`shared/autoplay-guard/`
+`extension-source/shared/autoplay-guard/`
 
 ## Files
 
 - `manifest.chrome.json`, `manifest.firefox.json`
-- `content.js` — runs at `document_start`
-- `popup.html`, `popup.js` — per-site allow toggle
-- `background.js` — per-site settings
+- `content.js` - runs at `document_start`
+- `main-world.js` - installs the guarded `HTMLMediaElement.play` wrapper
+- `popup.html`, `popup.js` - per-site allow toggle
+- `background.js` - per-site settings
 - `icons/`
 
 ## Permissions
 
 - `content_scripts.matches`: `<all_urls>`, `all_frames: true`, `run_at: document_start`
-- `storage` — per-site allow-list
+- `storage` - per-site allow-list
+- `activeTab` - current-site popup control
 
 ## Implementation
 
-Use `Element.prototype.play` interception **before** the site's JS runs (`document_start`):
+At `document_start`, exit immediately on dedicated music hosts (YouTube, SoundCloud, Spotify, Apple Music, Amazon Music, Bandcamp, Mixcloud, Tidal, Deezer, podcast/radio players, and their player/CDN subdomains). Do not bypass general sites that also happen to have a player (Amazon retail, Apple.com, BBC News). Elsewhere, wrap `HTMLMediaElement.prototype.play` in the main world. Reject a new play attempt only when the site is not allow-listed and the user has not interacted with the page. A click, tap, or key press on the page unlocks later `play()` calls so a video can start once it has finished loading — do not require the play call itself to happen in the same instant as the click.
 
-```js
-// content.js — injected at document_start into main world via a script tag
-const code = `
-  (() => {
-    const allowed = ${JSON.stringify(window.__AUTOPLAY_ALLOW__ === true)};
-    if (allowed) return;
-    const origPlay = HTMLMediaElement.prototype.play;
-    HTMLMediaElement.prototype.play = function() {
-      // Heuristic: if there's been no user gesture recently, refuse.
-      if (!navigator.userActivation || !navigator.userActivation.isActive) {
-        return Promise.reject(new DOMException("Autoplay blocked by Riah extension", "NotAllowedError"));
-      }
-      return origPlay.apply(this, arguments);
-    };
-  })();
-`;
-const s = document.createElement("script");
-s.textContent = code;
-(document.head || document.documentElement).prepend(s);
-s.remove();
-```
-
-The `navigator.userActivation` API tells us whether the user recently interacted. If not, we block `.play()`.
-
-For sites that use `autoplay` attribute directly, also scan DOM on `DOMContentLoaded` and strip the attribute.
+For sites that use `autoplay` attributes directly, scan the DOM and strip only those attributes until the user interacts. After that interaction, stop rewriting the player so loading is not delayed. DOM insertion, fullscreen, resize, and layout changes must never pause existing media.
 
 ## Per-site allow
 
-Popup: "Allow autoplay on this site: ON/OFF". When ON, inject `window.__AUTOPLAY_ALLOW__ = true` before the interception code runs.
+Popup: "Allow autoplay on this site: ON/OFF". When enabled, the original play behavior is allowed. Use this for a music site that is not yet on the built-in list.
 
 ## Acceptance criteria
 
-- YouTube home page: video thumbnails don't auto-preview.
-- CNN, random news sites: embedded videos don't auto-play.
-- Click a play button: video plays normally.
-- Allow a site → that site behaves as before.
+- YouTube and its subdomains: install no wrapper or observer and never affect playback.
+- Dedicated music, podcast, and radio hosts (including widget frames such as `w.soundcloud.com` and `open.spotify.com`): install no wrapper or observer and never affect playback.
+- News and other sites: initial script-driven autoplay without user activation is rejected.
+- Clicking a play button allows normal playback, including when the player calls `play()` only after the video has loaded.
+- After that click, the next item in a music or podcast queue on the same page can play without another gesture.
+- Moving an already-playing video in the DOM, resizing a player, entering fullscreen, or attaching debugging never calls `pause()`.
+- Allow-listing a site restores its original autoplay behavior.
 
 ## Note on overlap with youtube-controls
 
-This one runs everywhere and is general. `youtube-controls` specifically controls YouTube's "after-video-ends, play next" behavior. Different features; both can be installed.
+This extension explicitly bypasses YouTube. `youtube-controls` exclusively controls YouTube's after-video autoplay toggle and captions preference.

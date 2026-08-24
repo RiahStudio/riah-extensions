@@ -24,9 +24,9 @@
     {
       "id": "autoplay-guard",
       "name": "Riah Autoplay Guard",
-      "description": "Blocks unwanted media autoplay outside YouTube without pausing media you started",
+      "description": "Blocks unwanted media autoplay outside music sites without pausing media you started",
       "status": "active",
-      "version": "0.2.0",
+      "version": "0.2.4",
       "browsers_supported": [
         "chrome",
         "edge",
@@ -227,7 +227,7 @@
       "name": "Riah YouTube Controls",
       "description": "Keeps YouTube autoplay, captions, and opening playback in your preferred state on watch pages and Shorts",
       "status": "active",
-      "version": "0.3.1",
+      "version": "0.3.3",
       "browsers_supported": [
         "chrome",
         "edge",
@@ -239,6 +239,24 @@
       ],
       "file_path": "extension-source/shared/youtube-controls",
       "spec_file": "specs/youtube-controls.md"
+    },
+    {
+      "id": "youtube-resume",
+      "name": "Riah YouTube Resume",
+      "description": "Puts you back where you were in a YouTube video after the tab is discarded or reopened",
+      "status": "active",
+      "version": "0.1.1",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "storage"
+      ],
+      "file_path": "extension-source/shared/youtube-resume",
+      "spec_file": "specs/youtube-resume.md"
     }
   ]
 }
