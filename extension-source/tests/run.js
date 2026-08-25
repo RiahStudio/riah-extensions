@@ -739,14 +739,18 @@ async function runStaticAudit() {
     youtubeAutoplaySource.includes("isPlaylistContext") &&
       youtubeAutoplaySource.includes('.has("list")') &&
       youtubeAutoplaySource.includes("getPlaylistId") &&
-      youtubeAutoplaySource.includes("queueGraceUntil"),
+      youtubeAutoplaySource.includes("isQueueContext") &&
+      youtubeAutoplaySource.includes("listeningSession") &&
+      youtubeAutoplaySource.includes("queueGraceUntil") &&
+      youtubeAutoplaySource.includes("if (listeningSession || queueHoldOff || isQueueContext())"),
     "youtube-controls should leave playlist and mix queues alone."
   );
 
   const youtubeResumeSource = read(path.join(SHARED, "youtube-resume", "content.js"));
   assert(
     youtubeResumeSource.includes("isPlaylistUrl") &&
-      youtubeResumeSource.includes('searchParams.has("list")'),
+      youtubeResumeSource.includes('searchParams.has("list")') &&
+      youtubeResumeSource.includes("wasDiscarded"),
     "youtube-resume should skip playlist restore"
   );
 

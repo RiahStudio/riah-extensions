@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-24 - Background YouTube music keeps playing
+
+- Riah YouTube Controls 0.3.4 still opens a fresh video paused, but once a tab is playing — or sitting in the background — the next song is left alone. Brave was putting the now-silent tab to sleep, which killed playlists.
+- Riah YouTube Controls 0.3.5 keeps that listening session once a tab has already been playing, so the next song is not paused again.
+- Riah YouTube Resume 0.1.2 still restores a discarded single video, but it does not jump when YouTube just advanced to the next song in the same tab.
+
+
 ## 2026-08-24 - Brave playlists no longer skip
 
 - Riah YouTube Controls 0.3.3 still opens a single video paused, but a playlist, mix, or album keeps playing the next item even when YouTube is a moment late adding `list=` to the URL.

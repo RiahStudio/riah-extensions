@@ -54,6 +54,7 @@ Restoring, on load and on every SPA navigation (`yt-navigate-finish`, `popstate`
    start always wins.
 5b. Do nothing when the watch URL has `list=` (playlist, mix, or album) — an old
     saved place would skip or pause the next item.
+5c. Do nothing on in-tab next-item navigation unless the page was just woken from a discard (`document.wasDiscarded`).
 6. Do nothing when the video is already past three seconds — something else set it.
 7. Wait for the player (bounded poll, ~15s) and for `readyState >= 1`, then seek.
    YouTube resets `currentTime` while its player settles, so the seek is retried

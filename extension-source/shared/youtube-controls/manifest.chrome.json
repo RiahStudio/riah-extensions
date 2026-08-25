@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Riah YouTube Controls",
-  "version": "0.3.3",
+  "version": "0.3.5",
   "description": "Keeps YouTube autoplay, captions and opening playback in your preferred state on watch pages and Shorts.",
   "icons": {
     "32": "icons/32.png",

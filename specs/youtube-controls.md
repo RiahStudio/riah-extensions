@@ -39,6 +39,7 @@ On navigation to a `/watch` URL:
 8. Handle YouTube SPA navigation and late player-control insertion with bounded watch-page retries, without a page-wide mutation observer.
 9. Hold the opening frame paused through capture-phase `play` and `playing` listeners on `/watch` and `/shorts/*`, and only while every guard holds: the preference is on, the page is a hold page, the page is not a playlist/mix/album queue, the media sits inside the player, the video is under two seconds in, the page armed under twenty seconds ago, no queue-advance grace window is open, and no trusted pointer or key event has reached the player since arming.
 10. If the page is a playlist, mix, or album queue, skip the autoplay-toggle preference and skip re-arming the open-paused hold on `yt-navigate-finish`. Captions still follow the saved preference. If `list=` is missing for a moment after a queue advance, wait briefly before arming so the next item is not paused.
+11. If the document is hidden, or this tab has already been playing, treat it as a listening session: skip the hold and skip forcing autoplay off, so a background music playlist cannot go silent and then get discarded. Once a session is listening, do not re-arm the open-paused hold.
 
 ## Open-paused guards
 

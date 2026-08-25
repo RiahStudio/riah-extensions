@@ -59,6 +59,14 @@
     return listed;
   }
 
+  function isBackgroundTab() {
+    return document.visibilityState === "hidden";
+  }
+
+  function isQueueContext() {
+    return isPlaylistContext() || listeningSession || isBackgroundTab();
+  }
+
   // Open-paused covers watch pages and Shorts. Autonav + captions stay watch-only.
   function isHoldPage() {
     return isWatchPage() || isShortsPage();
@@ -198,7 +206,7 @@
       }
 
       attempts += 1;
-      const skipAutoplayPref = isPlaylistContext();
+      const skipAutoplayPref = isQueueContext();
       const autoplayButton = skipAutoplayPref ? null : findAutoplayButton();
       const autoplayState = autoplayButton ? readToggleState(autoplayButton) : null;
       const autoplayResolved =
@@ -241,6 +249,8 @@
   let playerTouched = false;
   let queueHoldOff = false;
   let queueGraceUntil = 0;
+  let listeningSession = false;
+  const QUEUE_GRACE_MS = 1500;
 
   function insidePlayer(node) {
     return !!node?.closest?.(
@@ -249,6 +259,10 @@
   }
 
   function armHold() {
+    if (listeningSession || queueHoldOff || isQueueContext()) {
+      playerTouched = true;
+      return;
+    }
     holdArmedAt = Date.now();
     playerTouched = false;
   }
@@ -259,11 +273,18 @@
       holdWanted &&
       !playerTouched &&
       isHoldPage() &&
-      !isPlaylistContext() &&
+      !isQueueContext() &&
       Date.now() >= queueGraceUntil &&
       Date.now() - holdArmedAt <= HOLD_WINDOW_MS &&
       Number(video?.currentTime || 0) <= HOLD_MAX_SECONDS
     );
+  }
+
+  function markListening(video) {
+    if (!video) {
+      return;
+    }
+    listeningSession = true;
   }
 
   function holdIfNeeded(video) {
@@ -279,6 +300,9 @@
       return;
     }
     holdIfNeeded(event.target);
+    if (event.type === "playing") {
+      markListening(event.target);
+    }
   }
 
   document.addEventListener("play", onPlaybackAttempt, { capture: true });
@@ -315,14 +339,14 @@
     .catch((error) => console.warn(error.message));
 
   document.addEventListener("yt-navigate-finish", () => {
-    if (isPlaylistContext()) {
+    if (isPlaylistContext() || listeningSession || isBackgroundTab()) {
       queueHoldOff = true;
       playerTouched = true;
       queueGraceUntil = 0;
     } else if (queueHoldOff) {
-      queueGraceUntil = Date.now() + 400;
+      queueGraceUntil = Date.now() + QUEUE_GRACE_MS;
       window.setTimeout(() => {
-        if (isPlaylistContext()) {
+        if (isPlaylistContext() || listeningSession || isBackgroundTab()) {
           playerTouched = true;
           queueGraceUntil = 0;
           return;
@@ -330,16 +354,16 @@
         queueHoldOff = false;
         queueGraceUntil = 0;
         armHold();
-      }, 400);
+      }, QUEUE_GRACE_MS);
     } else {
       queueHoldOff = false;
       queueGraceUntil = 0;
       armHold();
     }
-    setTimeout(scheduleApply, 400);
+    setTimeout(scheduleApply, QUEUE_GRACE_MS);
   });
   document.addEventListener("yt-page-data-updated", () => {
-    if (isShortsPage() && !isPlaylistContext()) {
+    if (isShortsPage() && !isQueueContext()) {
       armHold();
     }
     scheduleApply();

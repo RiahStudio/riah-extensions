@@ -192,6 +192,7 @@ async function seekTo(gen, video, seconds) {
 async function restore(gen, videoId, video, settings) {
   if (urlAsksForATime()) return;
   if (isPlaylistUrl()) return;
+  if (gen > 1 && !document.wasDiscarded) return;
 
   const key = PLACE_PREFIX + videoId;
   const stored = (await storageGet(key))[key];
