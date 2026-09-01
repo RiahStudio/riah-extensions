@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "Riah English Search",
+  "version": "0.1.1",
+  "description": "Keeps Google, YouTube, and store searches in English instead of Thai.",
+  "icons": {
+    "32": "icons/32.png",
+    "128": "icons/128.png"
+  },
+  "permissions": [
+    "declarativeNetRequest",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "https://*.amazon.co.th/*",
+    "https://*.amazon.com/*",
+    "https://*.bing.com/*",
+    "https://*.duckduckgo.com/*",
+    "https://*.google.co.th/*",
+    "https://*.google.com/*",
+    "https://*.youtube.com/*",
+    "https://chromewebstore.google.com/*",
+    "https://search.brave.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "english_search",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "action": {
+    "default_title": "Riah English Search"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.amazon.co.th/*",
+        "https://*.amazon.com/*",
+        "https://*.bing.com/*",
+        "https://*.duckduckgo.com/*",
+        "https://*.google.co.th/*",
+        "https://*.google.com/*",
+        "https://*.youtube.com/*",
+        "https://chromewebstore.google.com/*",
+        "https://search.brave.com/*"
+      ],
+      "js": [
+        "rewrite.js",
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "homepage_url": "https://riahstudio.com/"
+}

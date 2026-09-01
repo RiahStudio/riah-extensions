@@ -1,0 +1,359 @@
+[
+  {
+    "id": 1,
+    "priority": 100,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "regexSubstitution": "https://\\1google.com/\\2"
+      }
+    },
+    "condition": {
+      "regexFilter": "^https://([^/]*\\.)?google\\.co\\.th/(.*)$",
+      "excludedRequestDomains": [
+        "accounts.google.co.th",
+        "myaccount.google.co.th",
+        "mail.google.co.th",
+        "docs.google.co.th",
+        "drive.google.co.th",
+        "calendar.google.co.th",
+        "meet.google.co.th",
+        "chat.google.co.th",
+        "classroom.google.co.th",
+        "admin.google.co.th"
+      ],
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 90,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "addOrReplaceParams": [
+              { "key": "hl", "value": "en" },
+              { "key": "gl", "value": "us" },
+              { "key": "lr", "value": "lang_en" }
+            ]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "||google.com/search",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 90,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "addOrReplaceParams": [
+              { "key": "hl", "value": "en" },
+              { "key": "gl", "value": "US" }
+            ]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "||youtube.com/results",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 4,
+    "priority": 90,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "addOrReplaceParams": [
+              { "key": "setlang", "value": "en" },
+              { "key": "cc", "value": "US" }
+            ]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "||bing.com/search",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 5,
+    "priority": 90,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "addOrReplaceParams": [{ "key": "kl", "value": "us-en" }]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "||duckduckgo.com/",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 6,
+    "priority": 90,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "addOrReplaceParams": [
+              { "key": "hl", "value": "en" },
+              { "key": "gl", "value": "US" }
+            ]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "||play.google.com/",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 7,
+    "priority": 90,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "addOrReplaceParams": [{ "key": "hl", "value": "en" }]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "||chromewebstore.google.com/",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 8,
+    "priority": 90,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "addOrReplaceParams": [{ "key": "language", "value": "en_US" }]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "||amazon.com/",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 90,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "transform": {
+          "queryTransform": {
+            "addOrReplaceParams": [{ "key": "language", "value": "en_US" }]
+          }
+        }
+      }
+    },
+    "condition": {
+      "urlFilter": "||amazon.co.th/",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 50,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||google.com/",
+      "excludedRequestDomains": [
+        "accounts.google.com",
+        "myaccount.google.com",
+        "mail.google.com",
+        "docs.google.com",
+        "drive.google.com",
+        "calendar.google.com",
+        "meet.google.com",
+        "chat.google.com",
+        "classroom.google.com",
+        "admin.google.com"
+      ],
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 51,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||google.co.th/",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 52,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||youtube.com/",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 53,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||bing.com/",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 54,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||duckduckgo.com/",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 55,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||search.brave.com/",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 56,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||amazon.com/",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 57,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||amazon.co.th/",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 58,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Accept-Language",
+          "operation": "set",
+          "value": "en-US,en;q=0.9"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||chromewebstore.google.com/",
+      "resourceTypes": ["main_frame", "sub_frame", "xmlhttprequest"]
+    }
+  }
+]

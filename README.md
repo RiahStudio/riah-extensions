@@ -19,6 +19,7 @@ gets its own zip under `release/`.
 | --- | --- | --- | --- |
 | Riah Autoplay Guard | `autoplay-guard` | Chrome, Edge, Firefox | Blocks unwanted media autoplay outside music sites. |
 | Riah Cookie Quiet | `cookie-quiet` | Chrome, Edge | Dismisses or rejects cookie consent banners. |
+| Riah English Search | `english-search` | Chrome, Edge, Firefox | Keeps Google, YouTube, and store searches in English instead of the local language. |
 | Riah Library Search | `library-search` | Chrome, Edge, Firefox | Opens a configured library/catalog search from supported book pages. |
 | Riah Paste Guard | `paste-guard` | Chrome, Edge, Firefox | Restores paste in fields where websites try to block it. |
 | Riah Right Click Restorer | `right-click-restorer` | Chrome, Edge, Firefox | Restores right-click, copy, selection, and image drag behavior. |

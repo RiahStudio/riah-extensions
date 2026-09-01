@@ -257,6 +257,25 @@
       ],
       "file_path": "extension-source/shared/youtube-resume",
       "spec_file": "specs/youtube-resume.md"
+    },
+    {
+      "id": "english-search",
+      "name": "Riah English Search",
+      "description": "Keeps Google, YouTube, and store searches in English instead of the local language",
+      "status": "active",
+      "version": "0.1.1",
+      "browsers_supported": [
+        "chrome",
+        "edge",
+        "firefox"
+      ],
+      "manifest_version": 3,
+      "permissions": [
+        "declarativeNetRequest",
+        "webNavigation"
+      ],
+      "file_path": "extension-source/shared/english-search",
+      "spec_file": "specs/english-search.md"
     }
   ]
 }
