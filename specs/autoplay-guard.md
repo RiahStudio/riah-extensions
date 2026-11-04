@@ -6,6 +6,10 @@ General-purpose media autoplay blocker outside dedicated music sites.
 
 Outside dedicated music players, intercept new `<video>` and `<audio>` play attempts that lack user activation. Never call `pause()` on media that is already playing. After the user has started playback on a page, later `play()` calls on that page are allowed so queues can advance. YouTube, SoundCloud, Spotify, Apple Music, Bandcamp, Mixcloud, and other dedicated music/podcast/radio hosts are a built-in bypass so the next track can play, including from widget frames that never received the original click (especially in Firefox). YouTube's after-video autoplay toggle stays with the dedicated Riah YouTube extension.
 
+WhatsApp Web is a built-in bypass. The extension must not wrap `HTMLMediaElement.play` or inject MAIN-world scripts there — WhatsApp treats that as tampering and stays on the splash.
+
+Stay off the shared quiet-host list (WhatsApp, Discord, Slack, Gmail/Docs, Figma, Notion, GitHub, and similar). Those pages break if `HTMLMediaElement.play` is wrapped. Load `quiet-hosts/index.js` before the other content scripts.
+
 ## Target folder
 
 `extension-source/shared/autoplay-guard/`

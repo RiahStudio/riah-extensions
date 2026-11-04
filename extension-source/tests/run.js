@@ -143,15 +143,43 @@ async function connectCdp(wsUrl) {
   });
 
   await new Promise((resolve, reject) => {
-    socket.addEventListener("open", resolve, { once: true });
-    socket.addEventListener("error", reject, { once: true });
+    const timer = setTimeout(() => reject(new Error("CDP websocket open timed out")), 10000);
+    socket.addEventListener(
+      "open",
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true }
+    );
+    socket.addEventListener(
+      "error",
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+      { once: true }
+    );
   });
 
   return {
     async send(method, params = {}) {
       const id = ++nextId;
       const result = new Promise((resolve, reject) => {
-        pending.set(id, { resolve, reject });
+        const timer = setTimeout(() => {
+          pending.delete(id);
+          reject(new Error(`CDP ${method} timed out`));
+        }, 20000);
+        pending.set(id, {
+          resolve(value) {
+            clearTimeout(timer);
+            resolve(value);
+          },
+          reject(error) {
+            clearTimeout(timer);
+            reject(error);
+          }
+        });
       });
       socket.send(JSON.stringify({ id, method, params }));
       return result;
@@ -212,7 +240,9 @@ async function startEdge(extensionPath) {
 
   const child = spawn(EDGE, args, { stdio: "ignore" });
   const version = await waitFor(async () => {
-    const response = await fetch(`http://127.0.0.1:${debugPort}/json/version`);
+    const response = await fetch(`http://127.0.0.1:${debugPort}/json/version`, {
+      signal: AbortSignal.timeout(2000)
+    });
     if (!response.ok) {
       throw new Error("DevTools version endpoint not ready.");
     }
@@ -226,7 +256,9 @@ async function startEdge(extensionPath) {
         url: "about:blank"
       });
       const target = await waitFor(async () => {
-        const response = await fetch(`http://127.0.0.1:${debugPort}/json/list`);
+        const response = await fetch(`http://127.0.0.1:${debugPort}/json/list`, {
+          signal: AbortSignal.timeout(2000)
+        });
         const list = await response.json();
         const found = list.find((item) => item.id === targetId);
         if (!found) {
@@ -283,8 +315,13 @@ function createFixtureServer(routes) {
     if (!route) {
       try {
         const parsed = new URL(request.url, "http://127.0.0.1");
-        if (parsed.pathname === "/watch" && parsed.searchParams.has("list")) {
-          route = routes["/watch"];
+        if (parsed.pathname === "/watch") {
+          const videoId = parsed.searchParams.get("v");
+          if (videoId && routes[`/watch?v=${videoId}`]) {
+            route = routes[`/watch?v=${videoId}`];
+          } else if (parsed.searchParams.has("list")) {
+            route = routes["/watch"];
+          }
         }
       } catch (_) {}
     }
@@ -543,6 +580,31 @@ async function runStaticAudit() {
       hostPermissions: [],
       matches: ["https://m.youtube.com/*", "https://www.youtube.com/*"]
     },
+    "english-search": {
+      permissions: ["declarativeNetRequest", "webNavigation"],
+      hostPermissions: [
+        "https://*.amazon.co.th/*",
+        "https://*.amazon.com/*",
+        "https://*.bing.com/*",
+        "https://*.duckduckgo.com/*",
+        "https://*.google.co.th/*",
+        "https://*.google.com/*",
+        "https://*.youtube.com/*",
+        "https://chromewebstore.google.com/*",
+        "https://search.brave.com/*"
+      ],
+      matches: [
+        "https://*.amazon.co.th/*",
+        "https://*.amazon.com/*",
+        "https://*.bing.com/*",
+        "https://*.duckduckgo.com/*",
+        "https://*.google.co.th/*",
+        "https://*.google.com/*",
+        "https://*.youtube.com/*",
+        "https://chromewebstore.google.com/*",
+        "https://search.brave.com/*"
+      ]
+    },
     "youtube-resume": {
       permissions: ["storage"],
       hostPermissions: [],
@@ -695,10 +757,82 @@ async function runStaticAudit() {
   );
   assert(
     rightClickMainWorld.includes('host.endsWith(".youtube.com")') &&
+      rightClickMainWorld.includes("isRiahQuietHost") &&
       !rightClickMainWorld.includes('"mousedown"') &&
       !rightClickMainWorld.includes("Event.prototype.preventDefault") &&
       !rightClickMainWorld.includes("pointer-events"),
     "right-click-restorer should bypass YouTube and never intercept ordinary pointer behavior."
+  );
+
+  const pageUnblockSource = read(path.join(SHARED, "page-unblock", "main-world.js"));
+  const pasteGuardSource = read(path.join(SHARED, "paste-guard", "content.js"));
+  const pasteGuardManifest = json(path.join(SHARED, "paste-guard", "manifest.chrome.json"));
+  const rightClickManifest = json(path.join(SHARED, "right-click-restorer", "manifest.chrome.json"));
+  assert(
+    !/\.\s*prototype\s*\.\s*\w+\s*=/.test(pageUnblockSource) &&
+      !pageUnblockSource.includes("Event.prototype.preventDefault") &&
+      pageUnblockSource.includes("new MutationObserver"),
+    "page-unblock should scrub inline handlers with one observer and never assign to a prototype."
+  );
+  assert(
+    !pasteGuardSource.includes("Event.prototype") &&
+      !pasteGuardSource.includes("new MutationObserver") &&
+      pasteGuardSource.includes('install("paste-guard")'),
+    "paste-guard should install the shared unblock and leave prototypes and observers alone."
+  );
+  assert(
+    !rightClickMainWorld.includes("new MutationObserver") &&
+      rightClickMainWorld.includes('install("right-click-restorer")'),
+    "right-click-restorer should reuse the shared unblock observer instead of installing its own."
+  );
+  assert(
+    JSON.stringify(pasteGuardManifest.content_scripts[0].js) ===
+      JSON.stringify(["quiet-hosts/index.js", "page-unblock/main-world.js", "content.js"]),
+    "paste-guard should load page-unblock before its installer."
+  );
+  assert(
+    JSON.stringify(rightClickManifest.content_scripts[0].js) ===
+      JSON.stringify(["quiet-hosts/index.js", "page-unblock/main-world.js", "main-world.js"]),
+    "right-click-restorer should load page-unblock before its MAIN-world installer."
+  );
+  const rightClickStyle = read(path.join(SHARED, "right-click-restorer", "content.js"));
+  assert(
+    !rightClickStyle.includes("* {") &&
+      rightClickStyle.includes(":not(button)") &&
+      rightClickStyle.includes('[class*="btn"]') &&
+      rightClickStyle.includes("data-riah-keep-select") &&
+      rightClickStyle.includes("isRiahEmbeddedThirdParty"),
+    "right-click-restorer CSS must restore text selection without a blanket * { user-select: auto }."
+  );
+  assert(
+    pageUnblockSource.includes("PAGE_WIDE_PROPS") &&
+      pageUnblockSource.includes("isInsideInteractive") &&
+      pageUnblockSource.includes("sawInlineFor") &&
+      !pageUnblockSource.includes("sawInlineClipboardBlock"),
+    "page-unblock should latch only the matching clipboard/context-menu type, not every pointer event."
+  );
+  const autoplayManifest = json(path.join(SHARED, "autoplay-guard", "manifest.chrome.json"));
+  for (const [name, manifest] of [
+    ["autoplay-guard", autoplayManifest],
+    ["paste-guard", pasteGuardManifest],
+    ["right-click-restorer", rightClickManifest]
+  ]) {
+    const excluded = (manifest.content_scripts || []).every((entry) =>
+      Array.isArray(entry.exclude_matches) &&
+      entry.exclude_matches.includes("*://*.whatsapp.com/*") &&
+      entry.exclude_matches.includes("*://discord.com/*") &&
+      entry.exclude_matches.includes("*://mail.google.com/*")
+    );
+    assert(excluded, `${name} should exclude WhatsApp Web from content scripts.`);
+  }
+
+  const englishSearchContent = read(path.join(SHARED, "english-search", "content.js"));
+  assert(
+    englishSearchContent.indexOf("shouldSkipHost") !== -1 &&
+      englishSearchContent.indexOf("shouldSkipHost") < englishSearchContent.indexOf("history.pushState") &&
+      englishSearchContent.includes("return;") &&
+      englishSearchContent.indexOf("shouldSkipHost") < englishSearchContent.indexOf("history.pushState ="),
+    "english-search content.js should bail out on skipped Google hosts before patching history."
   );
 
   for (const fileName of ["content.js", "main-world.js"]) {
@@ -709,6 +843,7 @@ async function runStaticAudit() {
         autoplaySource.includes('"spotify.com"') &&
         autoplaySource.includes("music.apple.com") &&
         autoplaySource.includes("music.amazon.") &&
+        autoplaySource.includes("isRiahQuietHost") &&
         !autoplaySource.includes(".pause("),
       `autoplay-guard ${fileName} should bypass dedicated music hosts and never pause existing media.`
     );
@@ -728,6 +863,11 @@ async function runStaticAudit() {
       autoplayMainWorld.includes("pointerdown") &&
       autoplayMainWorld.includes("pageGestured"),
     "autoplay-guard should unlock on a click so a late play() can start the video."
+  );
+
+  assert(
+    !/\.detail\??\.\w/.test(autoplayMainWorld) && autoplayContent.includes('allowed ? "allowed" : "blocked"'),
+    "autoplay-guard should hand its config to the page as a plain string; Firefox hides objects made by the extension."
   );
 
   const youtubeAutoplaySource = read(path.join(SHARED, "youtube-controls", "content.js"));
@@ -932,6 +1072,415 @@ async function runBackgroundUnitTests() {
     const late = await HTMLMediaElement.prototype.play.call(el);
     assert(late === "played", "autoplay-guard should start a video after a click even if play() is late");
   }
+
+  {
+    // Firefox seals objects made by the extension: any property read on them throws.
+    const listeners = {};
+    function HTMLMediaElement() {}
+    HTMLMediaElement.prototype.play = function () { return Promise.resolve("played"); };
+    const sandbox = {
+      location: { hostname: "www.example-news.com" },
+      navigator: { userActivation: { isActive: false, hasBeenActive: false } },
+      document: {
+        readyState: "complete",
+        querySelectorAll() { return []; },
+        addEventListener(type, fn) { (listeners[type] || (listeners[type] = [])).push(fn); }
+      },
+      HTMLMediaElement,
+      Promise,
+      DOMException,
+      CustomEvent: function CustomEvent() {}
+    };
+    sandbox.window = sandbox;
+    vm.runInNewContext(read(path.join(SHARED, "autoplay-guard", "main-world.js")), sandbox);
+    const configListeners = listeners["riah-autoplay-guard-config"] || [];
+    assert(configListeners.length === 1, "autoplay-guard should listen for the config the extension sends the page.");
+    const el = new HTMLMediaElement();
+    const sealed = new Proxy({}, { get() { throw new Error("Permission denied to access property"); } });
+    configListeners[0]({ detail: sealed });
+    let stillBlocked = false;
+    await HTMLMediaElement.prototype.play.call(el).then(() => {}, () => { stillBlocked = true; });
+    assert(stillBlocked, "autoplay-guard should keep blocking, without throwing, when the config cannot be read.");
+    configListeners[0]({ detail: "allowed" });
+    const played = await HTMLMediaElement.prototype.play.call(el);
+    assert(played === "played", "autoplay-guard should let a host on the allow-list autoplay.");
+    configListeners[0]({ detail: "blocked" });
+    let blockedAgain = false;
+    await HTMLMediaElement.prototype.play.call(el).then(() => {}, () => { blockedAgain = true; });
+    assert(blockedAgain, "autoplay-guard should block again when the host leaves the allow-list.");
+  }
+
+  for (const [allowedHosts, expected] of [[["www.example-news.com"], "allowed"], [[], "blocked"]]) {
+    const events = [];
+    const sandbox = {
+      location: { hostname: "www.example-news.com" },
+      document: {
+        addEventListener() {},
+        dispatchEvent(event) { events.push(event); return true; },
+        querySelectorAll() { return []; },
+        documentElement: {}
+      },
+      CustomEvent: function CustomEvent(type, init) { this.type = type; this.detail = init && init.detail; },
+      MutationObserver: function MutationObserver() { this.observe = function () {}; },
+      chrome: { storage: { sync: { get(defaults, callback) { callback({ allowedHosts }); } } }, runtime: {} },
+      console,
+      Promise
+    };
+    vm.runInNewContext(read(path.join(SHARED, "autoplay-guard", "content.js")), sandbox);
+    await delay(20);
+    const config = events.find((entry) => entry.type === "riah-autoplay-guard-config");
+    assert(
+      config && config.detail === expected,
+      `autoplay-guard should tell the page "${expected}" as a plain string so Firefox can read it.`
+    );
+  }
+
+  {
+    const sandbox = { URL, module: { exports: {} } };
+    sandbox.globalThis = sandbox;
+    sandbox.exports = sandbox.module.exports;
+    vm.runInNewContext(read(path.join(SHARED, "english-search", "rewrite.js")), sandbox);
+    const { rewrite } = sandbox.module.exports;
+    const thai = rewrite("https://www.google.co.th/search?q=store&hl=th&gl=th");
+    assert(
+      typeof thai === "string" &&
+        thai.includes("google.com") &&
+        !thai.includes("google.co.th") &&
+        thai.includes("hl=en") &&
+        thai.includes("gl=us") &&
+        thai.includes("lr=lang_en"),
+      "english-search should send Thai Google searches to English google.com."
+    );
+    assert(
+      rewrite("https://www.google.com/search?q=store&hl=en&gl=us&lr=lang_en") === null,
+      "english-search should leave an already-English Google search alone."
+    );
+    assert(
+      rewrite("https://mail.google.com/mail/u/0/#inbox") === null,
+      "english-search should leave Gmail alone."
+    );
+    assert(
+      sandbox.module.exports.shouldSkipHost("accounts.google.com") &&
+        sandbox.module.exports.shouldSkipHost("mail.google.com") &&
+        sandbox.module.exports.shouldSkipHost("docs.google.com") &&
+        !sandbox.module.exports.shouldSkipHost("www.google.com") &&
+        !sandbox.module.exports.shouldSkipHost("chromewebstore.google.com"),
+      "english-search shouldSkipHost should match rewrite()'s skipped Google apps."
+    );
+    const youtube = rewrite("https://www.youtube.com/results?search_query=store&gl=TH&hl=th");
+    assert(
+      typeof youtube === "string" && youtube.includes("hl=en") && youtube.includes("gl=US"),
+      "english-search should force YouTube search into English."
+    );
+    assert(
+      rewrite("https://www.youtube.com/watch?v=abc&list=PLtest") === null,
+      "english-search should not rewrite YouTube watch/playlist player URLs."
+    );
+    assert(
+      rewrite("https://music.youtube.com/watch?v=abc&list=RDAMPL") === null,
+      "english-search should not rewrite YouTube Music player URLs."
+    );
+    const bing = rewrite("https://www.bing.com/search?q=store");
+    assert(
+      typeof bing === "string" && bing.includes("setlang=en") && bing.includes("cc=US"),
+      "english-search should force Bing search into English."
+    );
+  }
+
+  {
+    function makeElement(tag) {
+      return {
+        nodeType: 1,
+        tagName: tag || "",
+        parentElement: null,
+        parentNode: null,
+        className: "",
+        role: null,
+        tabIndexAttr: null,
+        userSelect: null,
+        cursor: null,
+        onclick: null,
+        onpaste: null,
+        oncopy: null,
+        oncut: null,
+        oncontextmenu: null,
+        ondragstart: null,
+        onselectstart: null,
+        getAttribute(name) {
+          if (name === "role") {
+            return this.role;
+          }
+          if (name === "class") {
+            return this.className || null;
+          }
+          if (name === "tabindex") {
+            return this.tabIndexAttr != null ? String(this.tabIndexAttr) : null;
+          }
+          if (name === "onclick" && this.onclick) {
+            return "return true";
+          }
+          return null;
+        },
+        removeAttribute() {},
+        querySelectorAll() {
+          return [];
+        }
+      };
+    }
+
+    function loadPageUnblock(options = {}) {
+      const windowListeners = [];
+      const body = makeElement();
+      if (options.bodyOnPaste) {
+        body.onpaste = function () {};
+      }
+      if (options.bodyOnContextMenu) {
+        body.oncontextmenu = function () {};
+      }
+      body.tagName = "BODY";
+      const html = makeElement();
+      html.querySelectorAll = () => [body];
+      const documentListeners = [];
+      let observerCount = 0;
+      const sandbox = {
+        window: null,
+        location: { hostname: options.hostname || "" },
+        document: {
+          nodeType: 9,
+          documentElement: html,
+          body,
+          addEventListener(type, fn, capture) {
+            documentListeners.push({ type, fn, capture });
+          }
+        },
+        Node: { ELEMENT_NODE: 1, DOCUMENT_NODE: 9 },
+        MutationObserver: function MutationObserver() {
+          observerCount += 1;
+          this.observe = function () {};
+          this.disconnect = function () {};
+        },
+        addEventListener(type, fn) {
+          windowListeners.push({ type, fn });
+        },
+        getComputedStyle(node) {
+          const userSelect =
+            (node && node.userSelect) || options.userSelect || "auto";
+          const cursor = (node && node.cursor) || options.cursor || "auto";
+          return {
+            userSelect,
+            webkitUserSelect: userSelect,
+            cursor
+          };
+        },
+        top: options.topHost
+          ? { location: { hostname: options.topHost } }
+          : undefined
+      };
+      sandbox.window = sandbox;
+      sandbox.globalThis = sandbox;
+      vm.runInNewContext(read(path.join(SHARED, "quiet-hosts", "index.js")), sandbox);
+      vm.runInNewContext(read(path.join(SHARED, "page-unblock", "main-world.js")), sandbox);
+      return { sandbox, windowListeners, observerCount: () => observerCount, body };
+    }
+
+    const idle = loadPageUnblock();
+    assert(
+      idle.windowListeners.length === 0 && idle.observerCount() === 0,
+      "page-unblock should install nothing until an extension calls install()."
+    );
+
+    const whatsapp = loadPageUnblock({ hostname: "web.whatsapp.com" });
+    assert(
+      !whatsapp.sandbox.__riahPageUnblock &&
+        whatsapp.windowListeners.length === 0 &&
+        whatsapp.observerCount() === 0,
+      "page-unblock should stay inert on WhatsApp Web."
+    );
+
+    const discord = loadPageUnblock({ hostname: "discord.com" });
+    assert(
+      !discord.sandbox.__riahPageUnblock &&
+        discord.windowListeners.length === 0,
+      "page-unblock should stay inert on Discord."
+    );
+    const gmail = loadPageUnblock({ hostname: "mail.google.com" });
+    assert(
+      !gmail.sandbox.__riahPageUnblock,
+      "page-unblock should stay inert on Gmail."
+    );
+
+    idle.sandbox.__riahPageUnblock.install("paste-guard");
+    idle.sandbox.__riahPageUnblock.install("right-click-restorer");
+    assert(
+      idle.observerCount() === 1,
+      "page-unblock should create exactly one MutationObserver when both extensions install."
+    );
+
+    const keydown = idle.windowListeners.find((entry) => entry.type === "keydown");
+    assert(keydown, "page-unblock should listen for clipboard keydown in capture.");
+    const normalShortcut = {
+      ctrlKey: true,
+      metaKey: false,
+      altKey: false,
+      key: "v",
+      target: idle.body,
+      stopImmediatePropagation() {
+        this.stopped = true;
+      },
+      stopped: false
+    };
+    keydown.fn(normalShortcut);
+    assert(
+      normalShortcut.stopped !== true,
+      "page-unblock should not swallow Ctrl/Cmd+V on a page that is not blocking the clipboard."
+    );
+
+    const blocking = loadPageUnblock({ bodyOnPaste: true });
+    blocking.sandbox.__riahPageUnblock.install("paste-guard");
+    const blockingKeydown = blocking.windowListeners.find((entry) => entry.type === "keydown");
+    const blockedShortcut = {
+      ctrlKey: true,
+      metaKey: false,
+      altKey: false,
+      key: "v",
+      target: blocking.body,
+      stopImmediatePropagation() {
+        this.stopped = true;
+      },
+      stopped: false
+    };
+    blockingKeydown.fn(blockedShortcut);
+    assert(
+      blockedShortcut.stopped === true,
+      "page-unblock should stop clipboard keydown only when the page is blocking paste."
+    );
+
+    const paste = idle.windowListeners.find((entry) => entry.type === "paste");
+    const pasteEvent = {
+      stopImmediatePropagation() {
+        this.stopped = true;
+      },
+      stopped: false
+    };
+    paste.fn(pasteEvent);
+    assert(
+      pasteEvent.stopped !== true,
+      "page-unblock should leave paste alone on a page that is not blocking it."
+    );
+    const blockingPaste = blocking.windowListeners.find((entry) => entry.type === "paste");
+    const blockingPasteEvent = {
+      type: "paste",
+      target: blocking.body,
+      stopImmediatePropagation() {
+        this.stopped = true;
+      },
+      stopped: false
+    };
+    blockingPaste.fn(blockingPasteEvent);
+    assert(
+      blockingPasteEvent.stopped === true,
+      "page-unblock should still neutralize blocking paste handlers in capture."
+    );
+
+    const widget = loadPageUnblock({ bodyOnContextMenu: true });
+    const bookButton = makeElement("BUTTON");
+    bookButton.userSelect = "none";
+    bookButton.parentElement = widget.body;
+    bookButton.parentNode = widget.body;
+    widget.sandbox.__riahPageUnblock.install("paste-guard");
+    function fire(type, target) {
+      const listener = widget.windowListeners.find((entry) => entry.type === type);
+      const event = {
+        type,
+        target,
+        stopImmediatePropagation() {
+          this.stopped = true;
+        },
+        stopped: false
+      };
+      listener.fn(event);
+      return event;
+    }
+    const widgetDrag = fire("dragstart", bookButton);
+    const widgetSelect = fire("selectstart", bookButton);
+    assert(
+      widgetDrag.stopped !== true && widgetSelect.stopped !== true,
+      "page-unblock should not treat a footer oncontextmenu or button user-select:none as a page-wide drag/select block."
+    );
+
+    const lockedText = makeElement("DIV");
+    lockedText.userSelect = "none";
+    lockedText.parentElement = widget.body;
+    lockedText.parentNode = widget.body;
+    const textSelect = fire("selectstart", lockedText);
+    assert(
+      textSelect.stopped === true,
+      "page-unblock should still unblock selectstart on non-interactive locked text."
+    );
+
+    const stillPaste = fire("paste", bookButton);
+    assert(
+      stillPaste.stopped !== true,
+      "page-unblock should not latch paste from a context-menu block."
+    );
+
+    const framed = loadPageUnblock({
+      hostname: "widget.example",
+      topHost: "booking.example"
+    });
+    assert(
+      !framed.sandbox.__riahPageUnblock && framed.windowListeners.length === 0,
+      "page-unblock should stay inert in a cross-origin embedded widget frame."
+    );
+  }
+
+  {
+    const origPush = function origPush() {};
+    const origReplace = function origReplace() {};
+    function makeSearchSandbox(hostname, href, pathname, search) {
+      const sandbox = {
+        location: { hostname, href, pathname, search },
+        history: { pushState: origPush, replaceState: origReplace, state: null },
+        addEventListener() {},
+        URL
+      };
+      sandbox.window = sandbox;
+      return sandbox;
+    }
+    const skipSandbox = makeSearchSandbox(
+      "accounts.google.com",
+      "https://accounts.google.com/",
+      "/",
+      ""
+    );
+    vm.runInNewContext(
+      read(path.join(SHARED, "english-search", "rewrite.js")) +
+        "\n" +
+        read(path.join(SHARED, "english-search", "content.js")),
+      skipSandbox
+    );
+    assert(
+      skipSandbox.history.pushState === origPush && skipSandbox.history.replaceState === origReplace,
+      "english-search should install nothing on accounts.google.com."
+    );
+
+    const searchSandbox = makeSearchSandbox(
+      "www.google.com",
+      "https://www.google.com/search?q=store",
+      "/search",
+      "?q=store"
+    );
+    vm.runInNewContext(
+      read(path.join(SHARED, "english-search", "rewrite.js")) +
+        "\n" +
+        read(path.join(SHARED, "english-search", "content.js")),
+      searchSandbox
+    );
+    assert(
+      searchSandbox.history.pushState !== origPush && searchSandbox.history.replaceState !== origReplace,
+      "english-search should still patch history on google.com search."
+    );
+  }
 }
 
 async function runBrowserSmokeTests() {
@@ -953,10 +1502,21 @@ async function runBrowserSmokeTests() {
       body: `<!doctype html><html><head>
         <style>#blocked { user-select: none; -webkit-user-select: none; }</style>
       </head><body>
+        <style>#book-now, #search-btn { user-select: none; -webkit-user-select: none; }</style>
         <div id="blocked">Blocked text</div>
+        <a id="book-now" class="tt-btn" href="#deal_finder_container" data-testid="book-now">Book Now</a>
+        <button id="search-btn" class="search-widget-search-button" type="button">Search</button>
+        <div id="deal_finder_container">finder</div>
         <div id="seek" role="slider" tabindex="0" style="display:block;width:400px;height:24px"></div>
         <script>
-          window.flags = { context: 0, selectstart: 0, copy: 0, mousedown: 0, seek: 0 };
+          window.flags = { context: 0, selectstart: 0, copy: 0, mousedown: 0, seek: 0, book: 0, search: 0 };
+          document.getElementById('book-now').addEventListener('click', (event) => {
+            event.preventDefault();
+            window.flags.book += 1;
+          });
+          document.getElementById('search-btn').addEventListener('click', () => {
+            window.flags.search += 1;
+          });
           window.addEventListener('contextmenu', () => { window.flags.context += 1; }, true);
           window.addEventListener('selectstart', () => { window.flags.selectstart += 1; }, true);
           window.addEventListener('copy', () => { window.flags.copy += 1; }, true);
@@ -1291,6 +1851,7 @@ async function runBrowserSmokeTests() {
 
   try {
     {
+      console.log("  smoke paste-guard");
       const edge = await startEdge(
         path.join(ROOT, "dist", "chrome", "paste-guard")
       );
@@ -1305,10 +1866,14 @@ async function runBrowserSmokeTests() {
               const paste = new Event('paste', { bubbles: true, cancelable: true });
               const context = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
               const copy = new Event('copy', { bubbles: true, cancelable: true });
+              const click = new Event('click', { cancelable: true });
+              click.preventDefault();
               const results = {
                 pasteAllowed: input.dispatchEvent(paste),
                 contextAllowed: input.dispatchEvent(context),
                 copyAllowed: input.dispatchEvent(copy),
+                preventDefaultStillWorks: click.defaultPrevented === true,
+                prototypeUntouched: !String(Event.prototype.preventDefault).includes("BLOCK_EVENTS"),
                 flags: window.flags
               };
               return JSON.stringify(results);
@@ -1318,8 +1883,10 @@ async function runBrowserSmokeTests() {
         assert(
           flags.pasteAllowed === true &&
             flags.contextAllowed === true &&
-            flags.copyAllowed === true,
-          "paste-guard should keep blocked events from being canceled."
+            flags.copyAllowed === true &&
+            flags.preventDefaultStillWorks === true &&
+            flags.prototypeUntouched === true,
+          "paste-guard should keep blocked events from being canceled without replacing preventDefault."
         );
         page.close();
       } finally {
@@ -1328,6 +1895,7 @@ async function runBrowserSmokeTests() {
     }
 
     {
+      console.log("  smoke right-click-restorer");
       const edge = await startEdge(
         path.join(ROOT, "dist", "chrome", "right-click-restorer")
       );
@@ -1349,6 +1917,8 @@ async function runBrowserSmokeTests() {
                 selectAllowed: blocked.dispatchEvent(select),
                 copyAllowed: blocked.dispatchEvent(copy),
                 userSelect: getComputedStyle(blocked).userSelect,
+                bookUserSelect: getComputedStyle(document.getElementById('book-now')).userSelect,
+                searchUserSelect: getComputedStyle(document.getElementById('search-btn')).userSelect,
                 mousedownCanStillBeCanceled: preventDefaultProbe.dispatchEvent(
                   new MouseEvent('mousedown', { bubbles: true, cancelable: true })
                 ),
@@ -1365,8 +1935,10 @@ async function runBrowserSmokeTests() {
             result.selectAllowed === true &&
             result.copyAllowed === true &&
             result.userSelect !== "none" &&
+            result.bookUserSelect === "none" &&
+            result.searchUserSelect === "none" &&
             result.mousedownCanStillBeCanceled === false,
-          "right-click-restorer should keep the events uncanceled and restore selection."
+          "right-click-restorer should restore locked text without forcing selection on booking controls."
         );
 
         // The style used to be injected from the main world, where the page's
@@ -1407,9 +1979,17 @@ async function runBrowserSmokeTests() {
         const pointerResult = JSON.parse(
           await evaluate(page, "JSON.stringify(window.flags)")
         );
+        await evaluate(
+          page,
+          `document.getElementById('book-now').click(); document.getElementById('search-btn').click();`
+        );
+        const clickResult = JSON.parse(await evaluate(page, "JSON.stringify(window.flags)"));
         assert(
-          pointerResult.mousedown === 1 && pointerResult.seek === 1,
-          "right-click-restorer should not intercept pointer seeking or clicks."
+          pointerResult.mousedown === 1 &&
+            pointerResult.seek === 1 &&
+            clickResult.book === 1 &&
+            clickResult.search === 1,
+          "right-click-restorer should not intercept pointer seeking or booking clicks."
         );
         page.close();
       } finally {
@@ -1418,6 +1998,7 @@ async function runBrowserSmokeTests() {
     }
 
     {
+      console.log("  smoke cookie-quiet reject");
       const edge = await startEdge(
         path.join(ROOT, "dist", "chrome", "cookie-quiet")
       );
@@ -1445,6 +2026,7 @@ async function runBrowserSmokeTests() {
     }
 
     {
+      console.log("  smoke cookie-quiet navigate");
       const edge = await startEdge(
         path.join(ROOT, "dist", "chrome", "cookie-quiet")
       );
@@ -1471,6 +2053,7 @@ async function runBrowserSmokeTests() {
     }
 
     {
+      console.log("  smoke autoplay-guard");
       const edge = await startEdge(
         path.join(ROOT, "dist", "chrome", "autoplay-guard")
       );
@@ -1492,8 +2075,11 @@ async function runBrowserSmokeTests() {
           page,
           `(async () => {
             try {
-              await document.createElement('video').play();
-              return 'resolved';
+              const outcome = await Promise.race([
+                document.createElement('video').play().then(() => 'resolved'),
+                new Promise((resolve) => setTimeout(() => resolve('timeout'), 3000))
+              ]);
+              return outcome;
             } catch (error) {
               return error.name;
             }
@@ -1513,8 +2099,11 @@ async function runBrowserSmokeTests() {
           existingPage,
           `(async () => {
             try {
-              await document.getElementById('existing-media').play();
-              return 'resolved';
+              const outcome = await Promise.race([
+                document.getElementById('existing-media').play().then(() => 'resolved'),
+                new Promise((resolve) => setTimeout(() => resolve('timeout'), 3000))
+              ]);
+              return outcome;
             } catch (error) {
               return error.name;
             }
@@ -1558,8 +2147,10 @@ async function runBrowserSmokeTests() {
           queuePage,
           `(async () => {
             try {
-              await document.getElementById('player').play();
-              return 'resolved';
+              return await Promise.race([
+                document.getElementById('player').play().then(() => 'resolved'),
+                new Promise((resolve) => setTimeout(() => resolve('timeout'), 3000))
+              ]);
             } catch (error) {
               return error.name;
             }
@@ -1570,8 +2161,10 @@ async function runBrowserSmokeTests() {
           queuePage,
           `(async () => {
             try {
-              await document.getElementById('player').play();
-              return 'resolved';
+              return await Promise.race([
+                document.getElementById('player').play().then(() => 'resolved'),
+                new Promise((resolve) => setTimeout(() => resolve('timeout'), 3000))
+              ]);
             } catch (error) {
               return error.name;
             }

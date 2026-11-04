@@ -7,7 +7,7 @@
       "name": "Riah Right Click Restorer",
       "description": "Restores right-click, copy, and selection without intercepting normal pointer controls",
       "status": "active",
-      "version": "0.2.2",
+      "version": "0.2.6",
       "browsers_supported": [
         "chrome",
         "edge",
@@ -26,7 +26,7 @@
       "name": "Riah Autoplay Guard",
       "description": "Blocks unwanted media autoplay outside music sites without pausing media you started",
       "status": "active",
-      "version": "0.2.4",
+      "version": "0.2.7",
       "browsers_supported": [
         "chrome",
         "edge",
@@ -119,7 +119,7 @@
       "name": "Riah Paste Guard",
       "description": "Restores paste in fields where websites try to block it",
       "status": "active",
-      "version": "0.1.0",
+      "version": "0.1.4",
       "browsers_supported": [
         "chrome",
         "edge",
@@ -263,7 +263,7 @@
       "name": "Riah English Search",
       "description": "Keeps Google, YouTube, and store searches in English instead of the local language",
       "status": "active",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "browsers_supported": [
         "chrome",
         "edge",

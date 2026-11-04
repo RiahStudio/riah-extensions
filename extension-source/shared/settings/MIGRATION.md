@@ -206,12 +206,9 @@ Touchpoints not yet migrated:
 | cookie-quiet | `background.js`, `popup.js`, `options.js` | Largest surface — multiple settings; do this one last. |
 | library-search | `popup.js`, `options.js`, `content.js` | Search template string. |
 | tab-sleeper | `background.js`, `popup.js`, `options.js` | Threshold, excludes, activity timestamps. |
-| page-translator | `background.js`, `options.js` | Target language. |
-| selection-translator | `background.js`, `options.js` | Target language. |
 | timeline-exporter | `background.js`, `content.js`, `popup.js` | Include-replies toggle. |
 | youtube-controls | `popup.js`, `content.js` | Autoplay-enabled toggle. |
 | youtube-quality | `popup.js`, `content.js` | Preferred quality. |
-| site-zoom | `background.js`, `popup.js`, `options.js` | Per-host zoom map. |
 
 Each gets its own migration commit. The pattern is the same every time:
 

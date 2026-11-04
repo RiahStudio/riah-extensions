@@ -28,12 +28,10 @@ Load Chromium packages from `dist/chrome/<slug>/` and Firefox packages from
 | --- | --- |
 | `autoplay-guard` | Open a news site with autoplaying media. Media should not start until user interaction. |
 | `cookie-quiet` | Open a site with a common cookie banner. The banner should dismiss or reject without accepting by default. |
+| `english-search` | Search Google from a Thailand IP. Results stay on `google.com` in English. Gmail and Accounts are untouched. |
 | `library-search` | Configure a search URL template, open a supported book page, and verify the library search button opens the expected query. |
-| `page-translator` | Open a non-English page, click the extension action, and verify a translation view opens. |
-| `paste-guard` | Open a page that blocks paste in a field. Paste should work. |
+| `paste-guard` | Open a page that blocks paste in a field. Paste should work. Gmail select-all / copy should still work. |
 | `right-click-restorer` | Open a page that blocks right-click or text selection. Context menu and selection should work. |
-| `selection-translator` | Select text, use the context-menu action, and verify a translation page opens. |
-| `site-zoom` | Change zoom on one site, revisit it, and verify the saved zoom reapplies without affecting unrelated sites. |
 | `tab-anchor` | Drag a tab out of a window. It should move back to the original window. |
 | `tab-sleeper` | Leave an inactive, safe tab idle past the threshold. It should discard without touching active, pinned, audible, or form-heavy tabs. |
 | `tenhou-english` | Open Tenhou and verify common UI labels appear in English. |
@@ -42,7 +40,7 @@ Load Chromium packages from `dist/chrome/<slug>/` and Firefox packages from
 | `volume-boost` | In Brave/Chromium, play a quiet tab, move the slider above 100%, verify audio increases, then reset to 100%. |
 | `youtube-controls` | Open a YouTube watch page and verify autoplay/caption preferences apply without seek-bar interference. |
 | `youtube-quality` | Open a YouTube watch page and verify the configured quality ceiling is applied. |
-| `zoom-baseline` | Open a few tabs and verify the default zoom baseline is applied. |
+| `youtube-resume` | Discard a YouTube tab mid-video, reopen it, and verify the playhead returns. |
 
 ## Public Release Gates
 

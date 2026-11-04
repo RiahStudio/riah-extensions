@@ -29,6 +29,8 @@ Rules for visible product names and store-safe source slugs.
 | `volume-boost` | Riah Volume Boost |
 | `youtube-quality` | Riah YouTube Quality |
 | `youtube-controls` | Riah YouTube Controls |
+| `youtube-resume` | Riah YouTube Resume |
+| `english-search` | Riah English Search |
 
 ## Retired names
 

@@ -4,7 +4,11 @@ Force-enables right-click, copy, selection, and image drag on sites that block t
 
 ## What it does
 
-Strips the JavaScript hooks sites use to disable right-click and copying. Overlaps with `paste-guard` but goes further: also removes CSS `user-select: none` and re-enables image drag.
+Strips the JavaScript hooks sites use to disable right-click and copying. Overlaps with `paste-guard` but goes further by removing CSS `user-select: none`. It must never intercept ordinary pointer controls.
+
+The MAIN-world capture listeners and inline-handler observer live in `shared/page-unblock/`, shared with Paste Guard. Both extensions stay installable on their own; when both are present, the page still gets one observer.
+
+YouTube is a built-in bypass. The extension exits before installing any listener, style, or observer on `youtube.com` and its subdomains because the player is a high-frequency interactive application.
 
 ## Target folder
 
@@ -13,7 +17,8 @@ Strips the JavaScript hooks sites use to disable right-click and copying. Overla
 ## Files
 
 - `manifest.chrome.json`, `manifest.firefox.json`
-- `content.js`
+- `main-world.js` — YouTube bypass, then `page-unblock.install("right-click-restorer")`
+- `content.js` — isolated-world CSS (`user-select`) and per-host enable flag
 - `popup.html` + `popup.js` — per-site enable/disable toggle
 - `background.js` — tracks per-site settings
 - `icons/`
@@ -26,33 +31,7 @@ Strips the JavaScript hooks sites use to disable right-click and copying. Overla
 
 ## Implementation
 
-```js
-// content.js
-// 1. Block the events sites use to disable right-click.
-const BLOCK = ["contextmenu", "selectstart", "copy", "cut", "mousedown", "dragstart"];
-for (const name of BLOCK) {
-  window.addEventListener(name, (e) => e.stopImmediatePropagation(), true);
-}
-
-// 2. Inject CSS that forces selection.
-const style = document.createElement("style");
-style.textContent = `
-  * { user-select: auto !important; -webkit-user-select: auto !important; -moz-user-select: auto !important; }
-  img { -webkit-user-drag: auto !important; pointer-events: auto !important; }
-`;
-(document.head || document.documentElement).appendChild(style);
-
-// 3. Null out inline handlers.
-const props = ["oncontextmenu", "onselectstart", "oncopy", "oncut", "onmousedown", "ondragstart"];
-function scrub(root) {
-  for (const p of props) { try { root[p] = null; } catch {} }
-}
-scrub(document);
-scrub(document.body);
-new MutationObserver(() => scrub(document.body)).observe(document.documentElement, {
-  subtree: true, attributes: true, attributeFilter: props,
-});
-```
+MAIN world loads `page-unblock/main-world.js` then `main-world.js`. Isolated world injects the selection CSS (page CSP cannot block a content-script style). Per-host disable is a CustomEvent into the shared unblock so listeners become no-ops when this extension is the only owner.
 
 ## Popup
 
@@ -62,5 +41,9 @@ new MutationObserver(() => scrub(document.body)).observe(document.documentElemen
 ## Acceptance criteria
 
 - On a site that disables right-click (e.g. many stock-photo sites), right-click menu works after extension is enabled.
-- Toggle off for a specific host → site's own right-click blocking resumes.
+- Toggle off for a specific host → site's own right-click blocking resumes (when Paste Guard is not also installed).
 - Text selection with mouse drag works on sites that previously blocked it.
+- Normal `mousedown`, click, drag, slider, and seek-bar interactions are never intercepted.
+- The extension never replaces `Event.prototype.preventDefault` or forces `pointer-events` CSS.
+- On YouTube, the extension installs nothing and leaves the player completely untouched.
+- Together with Paste Guard, the page has exactly one MAIN-world MutationObserver scrubbing inline handler props.

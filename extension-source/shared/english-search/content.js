@@ -5,6 +5,16 @@
     return;
   }
 
+  // rewrite() already refuses these hosts. Patching history on Gmail, Docs,
+  // Accounts, and the rest is risk with no benefit, so bail before installing
+  // anything at all.
+  if (
+    typeof RIAH_ENGLISH_SEARCH.shouldSkipHost === "function" &&
+    RIAH_ENGLISH_SEARCH.shouldSkipHost(location.hostname)
+  ) {
+    return;
+  }
+
   var applying = false;
 
   function apply() {

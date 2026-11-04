@@ -1,10 +1,51 @@
 # Changelog
 
+## 2026-10-05 - Autoplay Guard's allow-list reaches the page in Firefox
+
+- Autoplay Guard 0.2.7 tells the page script a site's allow-list setting as plain text instead of an object. Firefox hides objects made by the extension, so the page script threw "Permission denied to access property allowed" on every page and never learned that a site was allowed. Chrome and Edge behave as before.
+
+## 2026-09-18 - Booking clicks and widgets work again
+
+- Right Click Restorer 0.2.6 no longer forces `user-select: auto` on buttons, links, sliders, or other controls. That blanket CSS was turning Buy / Book / Search clicks into text selection.
+- Paste Guard 0.1.4 / shared page-unblock only stop the event type a page is actually blocking. A footer `oncontextmenu` no longer latches `dragstart` / `selectstart` for the whole page.
+- Cross-origin widget iframes are left alone. Ordinary text that was locked with `user-select: none` is still selectable.
+
+## 2026-09-17 - Paste, right-click, and autoplay stay off app pages
+
+- Paste Guard 0.1.3 and Right Click Restorer 0.2.5 no longer swallow copy / paste / right-click on every site. They only stop those events when the page is actually blocking them, so Gmail, Docs, Figma, and the rest keep their own shortcuts.
+- Those two plus Autoplay Guard 0.2.6 stay off a shared quiet-host list (WhatsApp, Discord, Slack, Google/Microsoft apps, Notion, GitHub, and similar). They were breaking those pages by injecting MAIN-world hooks.
+
+## 2026-09-17 - WhatsApp Web can load again
+
+- Autoplay Guard 0.2.5, Paste Guard 0.1.2, and Right Click Restorer 0.2.4 stay off WhatsApp Web. Those three inject MAIN-world scripts on every site; WhatsApp never finishes the splash if play() is wrapped or a page-wide MutationObserver is watching the boot.
+
+## 2026-09-06 - Paste, right-click, English Search, and Cookie Quiet
+
+- Paste Guard no longer replaces `Event.prototype.preventDefault`. Capture listeners plus inline-handler scrubbing restore paste without making `preventDefault` a no-op on every page, so editors that sanitise clipboard HTML are not double-pasted.
+- Ctrl/Cmd + A/C/V/X is only stopped when the page is actually blocking the clipboard, so Gmail and other in-app shortcuts keep working.
+- Paste Guard and Right Click Restorer share one MAIN-world MutationObserver (`shared/page-unblock/`). Each still works if the other is not installed.
+- English Search 0.1.2 installs nothing on accounts.google.com, Gmail, Docs, and the other hosts `rewrite()` already skips — no `history` patch on Google's sign-in or app pages.
+- Cookie Quiet is back in the Brave daily installer after the 2026-08-11 rename left it out of the load path. Chrome and Edge packages were already built.
+- Public `release/` zips now include English Search and YouTube Resume (Chrome/Edge/Firefox) plus the existing Tab Sleeper Firefox zip. Those three were active in the registry but missing from `release/chrome`.
+
+# Changelog
+
+## 2026-08-25 - English Search no longer reloads playlists
+
+- Riah English Search 0.1.1 still puts YouTube search in English, but leaves watch, playlist, and YouTube Music player pages alone so the next song is not a full reload.
+
+# Changelog
+
 ## 2026-08-24 - Background YouTube music keeps playing
 
 - Riah YouTube Controls 0.3.4 still opens a fresh video paused, but once a tab is playing — or sitting in the background — the next song is left alone. Brave was putting the now-silent tab to sleep, which killed playlists.
 - Riah YouTube Controls 0.3.5 keeps that listening session once a tab has already been playing, so the next song is not paused again.
 - Riah YouTube Resume 0.1.2 still restores a discarded single video, but it does not jump when YouTube just advanced to the next song in the same tab.
+
+## 2026-08-24 - Searches stay in English
+
+- Riah English Search 0.1.0 keeps Google, YouTube, Bing, DuckDuckGo, Brave Search, Amazon, Play Store, and the Chrome Web Store in English, even from a Thailand connection.
+- Thai Google (`google.co.th`) is sent to `google.com` with English results. Gmail and Docs are left alone.
 
 
 ## 2026-08-24 - Brave playlists no longer skip
@@ -99,11 +140,12 @@
 
 ## 2026-07-29 - Retired six extensions the browser now does natively
 
-- Deleted `cookie-quiet`, `tab-sleeper`, `site-zoom`, `zoom-baseline`,
-  `page-translator`, and `selection-translator`. Brave and Firefox both ship
+- Deleted the zoom and translation extensions. Brave and Firefox both ship
   cookie-notice blocking, idle-tab unloading, per-site zoom, a default zoom
-  preference, and page/selection translation. A rebuilt extension we have to
-  maintain and trust is worse than a browser feature that is already there.
+  preference, and page/selection translation. Cookie Quiet and Tab Sleeper
+  later returned, scoped to browsers that still lack those jobs. A rebuilt
+  extension we have to maintain and trust is worse than a browser feature that
+  is already there.
 - Google Translate is now retired outright rather than replaced by a Riah
   extension, since Brave translates natively.
 - Riah Volume Boost is Chrome-only. Its Firefox manifest was a stub without

@@ -5,6 +5,17 @@
       return false;
     }
     host = String(host).toLowerCase();
+    if (typeof isRiahQuietHost === "function" && isRiahQuietHost(host)) {
+      return true;
+    }
+    if (
+      host === "whatsapp.com" ||
+      host.endsWith(".whatsapp.com") ||
+      host === "whatsapp.net" ||
+      host.endsWith(".whatsapp.net")
+    ) {
+      return true;
+    }
     if (host.startsWith("music.amazon.")) {
       return true;
     }
@@ -121,7 +132,7 @@
   };
 
   document.addEventListener("riah-autoplay-guard-config", (event) => {
-    allowed = !!event.detail?.allowed;
+    allowed = event.detail === "allowed";
     if (!allowed) {
       blockExistingAutoplay();
     }

@@ -17,7 +17,7 @@ gets its own zip under `release/`.
 
 | Extension | Source slug | Browsers | What it does |
 | --- | --- | --- | --- |
-| Riah Autoplay Guard | `autoplay-guard` | Chrome, Edge, Firefox | Blocks unwanted media autoplay outside music sites. |
+| Riah Autoplay Guard | `autoplay-guard` | Chrome, Edge, Firefox | Blocks unwanted media autoplay outside YouTube. |
 | Riah Cookie Quiet | `cookie-quiet` | Chrome, Edge | Dismisses or rejects cookie consent banners. |
 | Riah English Search | `english-search` | Chrome, Edge, Firefox | Keeps Google, YouTube, and store searches in English instead of the local language. |
 | Riah Library Search | `library-search` | Chrome, Edge, Firefox | Opens a configured library/catalog search from supported book pages. |

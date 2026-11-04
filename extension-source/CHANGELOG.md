@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-18
+
+- Right Click Restorer no longer uses `* { user-select: auto }`. Controls keep the page's `user-select: none`.
+- page-unblock latches only matching clipboard / context-menu handlers, so booking widgets keep drag and click.
+
+
+## 2026-09-06
+
+- Shared `page-unblock` library: one MAIN-world MutationObserver for Paste Guard
+  and Right Click Restorer. Paste Guard no longer assigns to
+  `Event.prototype.preventDefault`. Clipboard shortcuts are only intercepted
+  when the page is blocking paste.
+- English Search content script returns before any `history` patch on hosts
+  `rewrite()` already skips (Accounts, Gmail, Docs, and the rest).
+- Cookie Quiet is in the Brave daily installer again.
+
 ## 2026-07-22
 
 - Added Riah Volume Boost as a Chromium/Brave-first tab-audio booster with no

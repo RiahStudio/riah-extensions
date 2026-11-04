@@ -5,6 +5,17 @@
       return false;
     }
     host = String(host).toLowerCase();
+    if (typeof isRiahQuietHost === "function" && isRiahQuietHost(host)) {
+      return true;
+    }
+    if (
+      host === "whatsapp.com" ||
+      host.endsWith(".whatsapp.com") ||
+      host === "whatsapp.net" ||
+      host.endsWith(".whatsapp.net")
+    ) {
+      return true;
+    }
     if (host.startsWith("music.amazon.")) {
       return true;
     }
@@ -102,10 +113,12 @@
     });
   }
 
+  // A plain string reaches the page script in Chrome and Firefox. An object made
+  // here is sealed off from the page in Firefox, so reading it there throws.
   function sendConfig(allowed) {
     document.dispatchEvent(
       new CustomEvent("riah-autoplay-guard-config", {
-        detail: { allowed }
+        detail: allowed ? "allowed" : "blocked"
       })
     );
   }

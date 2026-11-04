@@ -23,6 +23,7 @@ Source pack: `docs/brand/riah-icon-pack/icons-pack/svg/` (Ink/Mono style,
 | `volume-boost` | Riah Volume Boost | `riah-wave` |
 | `youtube-controls` | Riah YouTube Controls | `riah-play` |
 | `youtube-quality` | Riah YouTube Quality | `riah-sliders` |
+| `english-search` | Riah English Search | `riah-search` |
 
 ## Regenerating
 

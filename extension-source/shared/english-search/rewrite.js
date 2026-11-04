@@ -140,6 +140,10 @@ var RIAH_ENGLISH_SEARCH = (function () {
     return setParam(url, "hl", "en");
   }
 
+  function shouldSkipHost(host) {
+    return SKIP_GOOGLE_HOST.test(String(host || "").toLowerCase());
+  }
+
   function rewrite(href) {
     var url;
     try {
@@ -176,7 +180,8 @@ var RIAH_ENGLISH_SEARCH = (function () {
 
   return {
     ACCEPT_LANGUAGE: ACCEPT_LANGUAGE,
-    rewrite: rewrite
+    rewrite: rewrite,
+    shouldSkipHost: shouldSkipHost
   };
 })();
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Riah English Search",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Keeps Google, YouTube, and store searches in English instead of Thai.",
   "icons": {
     "32": "icons/32.png",
