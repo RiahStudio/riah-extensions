@@ -214,6 +214,29 @@ async function rmrfWithRetry(targetPath) {
   throw lastError || new Error(`Unable to remove ${targetPath}`);
 }
 
+// Last resort: end any msedge.exe still using this test's own temp profile.
+// Matches only the riah-edge-* folder this run created, never a user browser.
+function killByProfile(profileDir) {
+  if (process.platform !== "win32" || !path.basename(profileDir).startsWith("riah-edge-")) {
+    return;
+  }
+  const needle = path.basename(profileDir).replace(/'/g, "");
+  try {
+    execFileSync(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        `Get-CimInstance Win32_Process -Filter "Name='msedge.exe'" | Where-Object { $_.CommandLine -like '*${needle}*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`
+      ],
+      { stdio: "ignore", windowsHide: true, timeout: 20000 }
+    );
+  } catch (error) {
+    void error;
+  }
+}
+
 async function startEdge(extensionPath) {
   const debugPort = nextDebugPort++;
   const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), "riah-edge-"));
@@ -230,7 +253,11 @@ async function startEdge(extensionPath) {
     "--disable-component-update",
     "--disable-default-apps",
     "--disable-breakpad",
-    "--disable-crash-reporter"
+    "--disable-crash-reporter",
+    // Test pages call play(); a headless browser still reaches the speakers.
+    "--mute-audio",
+    // Keep test browsers off the only GPU, which also draws the desktop.
+    "--disable-gpu"
   ];
 
   if (extensionPath) {
@@ -272,14 +299,24 @@ async function startEdge(extensionPath) {
       return page;
     },
     async close() {
+      // Ask the real browser to quit first. The spawned msedge.exe can hand off
+      // to another process, so taskkill on child.pid alone left every test
+      // browser running (142 after one suite) and the smoke tests crawled.
+      try {
+        await Promise.race([browser.send("Browser.close"), delay(3000)]);
+      } catch (error) {
+        void error;
+      }
       browser.close();
       try {
         execFileSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
-          stdio: "ignore"
+          stdio: "ignore",
+          windowsHide: true
         });
       } catch (error) {
         void error;
       }
+      killByProfile(profileDir);
       await delay(500);
       await rmrfWithRetry(profileDir);
     }
