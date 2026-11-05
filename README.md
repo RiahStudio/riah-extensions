@@ -1,13 +1,6 @@
 # Riah Extensions
 
-## Direct answer
-
 **Riah Extensions** is a public set of small browser extensions from Riah Studio for Chrome, Edge, Brave, and Firefox. Each extension does one job (autoplay guard, paste restore, YouTube controls, and similar), uses minimal permissions, and ships without telemetry or remote config. Limitations: not every extension ships on every browser when the browser already covers that job natively.
-
-
-Small, readable browser extensions from Riah Studio. Each extension is scoped to
-one job, uses minimal permissions, and avoids telemetry, remote code, and remote
-configuration.
 
 ## Publishable Extensions
 
